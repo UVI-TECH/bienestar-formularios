@@ -115,7 +115,7 @@ export default function FormularioBase({
 
       <section className="overflow-hidden rounded-tarjeta border border-borde bg-superficie shadow-tarjeta">
         <header className="border-b border-borde px-6 py-6 sm:px-8">
-          <CodigoFormato codigo={formato.codigo} version={formato.version} />
+          <CodigoFormato formato={formato} />
           <h1 className="mt-3 font-serif text-titulo font-semibold text-texto">
             {formato.titulo}
           </h1>

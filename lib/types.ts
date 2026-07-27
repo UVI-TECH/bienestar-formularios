@@ -57,12 +57,20 @@ export interface RegistroBase extends DatosAtencion {
    Identificación del formato institucional
    --------------------------------------------------------------------------- */
 
-/** Encabezado documental de cada formulario, p. ej. `BH-F-013 · V-1-2018`. */
+/**
+ * Encabezado documental de cada formulario.
+ *
+ * Los formatos ya codificados en Isolución llevan `codigo` y `version`
+ * (p. ej. `BH-F-013 · V-1-2018`). Un instrumento nuevo, mientras Calidad no le
+ * asigne código, se identifica con `sello`: un texto libre que ocupa su lugar.
+ */
 export interface Formato {
-  codigo: string;
-  version: string;
   titulo: string;
   descripcion?: string;
+  codigo?: string;
+  version?: string;
+  /** Sólo cuando el formato aún no tiene código asignado. */
+  sello?: string;
 }
 
 /* ---------------------------------------------------------------------------

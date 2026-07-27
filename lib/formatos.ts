@@ -7,9 +7,10 @@ export interface FormatoConRuta extends Formato {
 /**
  * Catálogo de los formatos del área de salud y su ruta en la aplicación.
  *
- * PENDIENTE: sólo el código de Asistencia a Enfermería (BH-F-013 · V-1-2018)
- * está confirmado. Los otros tres son marcadores de posición; reemplácelos por
- * los códigos y versiones reales del sistema de gestión de calidad.
+ * Los códigos provienen del sistema de gestión de calidad (Isolución).
+ * Accidente por Póliza Estudiantil es un instrumento nuevo y todavía no tiene
+ * código: lleva `sello` en su lugar. Cuando Calidad se lo asigne, reemplace el
+ * `sello` por `codigo` y `version` aquí; el resto de la aplicación se adapta.
  */
 export const FORMATOS = {
   enfermeria: {
@@ -22,7 +23,7 @@ export const FORMATOS = {
   },
   consultaMedica: {
     ruta: "/consulta-medica",
-    codigo: "BH-F-014",
+    codigo: "BH-F-020",
     version: "V-1-2018",
     titulo: "Consulta Médica",
     descripcion:
@@ -30,7 +31,7 @@ export const FORMATOS = {
   },
   tamizaje: {
     ruta: "/tamizaje",
-    codigo: "BH-F-015",
+    codigo: "BH-F-016",
     version: "V-1-2018",
     titulo: "Tamizaje",
     descripcion:
@@ -38,8 +39,7 @@ export const FORMATOS = {
   },
   poliza: {
     ruta: "/poliza",
-    codigo: "BH-F-016",
-    version: "V-1-2018",
+    sello: "Formato en definición · Bienestar Universitario",
     titulo: "Accidente por Póliza Estudiantil",
     descripcion:
       "Reporte del accidente y de los datos requeridos para activar la póliza estudiantil.",

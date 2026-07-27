@@ -35,7 +35,7 @@ components/
 lib/
   catalogos.ts            SEDES, TIPOS_PERSONA, SEXO, SEMESTRES, PROGRAMAS, ENFERMERAS
   types.ts                Tipos base de los formularios
-  formatos.ts             Código, versión, título y ruta de cada formato
+  formatos.ts             Código (o sello), título y ruta de cada formato
   fechas.ts               Fecha/hora en zona America/Bogota
   validacion.ts           Reglas de validación reutilizables
   motion.ts               Tokens de movimiento para JavaScript
@@ -94,8 +94,10 @@ sincronizados: `app/globals.css` (`--dur-*`, `--ease-salida`) para CSS, y
 - `PROGRAMAS` y `ENFERMERAS` en `lib/catalogos.ts` están vacíos. Mientras lo
   estén, `CampoSelect` se muestra deshabilitado con el texto
   "Catálogo sin configurar" en lugar de un desplegable vacío.
-- En `lib/formatos.ts` sólo está confirmado el código de Asistencia a Enfermería
-  (`BH-F-013 · V-1-2018`). Los otros tres son marcadores de posición.
+- **Accidente por Póliza Estudiantil** es un instrumento nuevo y todavía no
+  tiene código en Isolución. En `lib/formatos.ts` lleva `sello` en lugar de
+  `codigo`/`version`, y se muestra con borde punteado. Cuando Calidad le asigne
+  código, cámbielo allí: el resto de la aplicación se adapta sola.
 - El azul institucional es un marcador de posición.
 - `CampoCedula` recibe `onBuscar` como prop; el endpoint `/api/lookup` todavía
   no existe.

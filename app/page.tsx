@@ -42,11 +42,7 @@ export default function Indice() {
                 {formato.descripcion}
               </p>
 
-              <CodigoFormato
-                codigo={formato.codigo}
-                version={formato.version}
-                className="mt-5 self-start"
-              />
+              <CodigoFormato formato={formato} className="mt-5 self-start" />
             </Link>
           </li>
         ))}
