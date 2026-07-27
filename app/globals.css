@@ -223,6 +223,17 @@
     cursor: not-allowed;
   }
 
+  /* Campo con un dato traído de otro sistema: se lee y se copia, no se edita.
+     A diferencia de :disabled conserva el contraste del texto, porque el dato
+     sí importa; sólo el fondo indica que está bloqueado. */
+  .control-solo-lectura,
+  .control-solo-lectura:hover {
+    background-color: var(--color-superficie-tenue);
+    border-color: var(--color-borde);
+    color: var(--color-texto);
+    cursor: default;
+  }
+
   .control-base[aria-invalid="true"] {
     border-color: var(--color-error-600);
   }

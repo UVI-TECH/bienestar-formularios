@@ -27,7 +27,9 @@ export type Opcional<T extends string> = T | "";
 /** Identificación de la persona atendida, común a los cuatro formularios. */
 export interface DatosPersona {
   cedula: string;
-  nombreCompleto: string;
+  /** Nombres y apellidos van separados porque así los entrega Smart Campus. */
+  nombres: string;
+  apellidos: string;
   tipoPersona: Opcional<TipoPersona>;
   programa: Programa;
   semestre: Opcional<Semestre>;
@@ -83,13 +85,28 @@ export type EstadoEnvio = "inactivo" | "enviando" | "exito" | "error";
 export type ErroresFormulario = Record<string, string>;
 
 /* ---------------------------------------------------------------------------
-   Consulta de persona por cédula (/api/lookup)
+   Consulta de persona por cédula (POST /api/lookup)
    --------------------------------------------------------------------------- */
 
+export interface CuerpoConsultaCedula {
+  cedula: string;
+  tipoPersona?: string;
+}
+
+/**
+ * Forma exacta y única de la respuesta de `/api/lookup`.
+ *
+ * El route handler nunca reenvía la respuesta cruda de Smart Campus: la mapea
+ * a estos campos y descarta todo lo demás. Los errores (cédula inválida, límite
+ * de consultas, fallo del servicio externo) viajan en el código HTTP, no en el
+ * cuerpo, para que esta forma no cambie nunca.
+ */
 export interface RespuestaConsultaCedula {
   encontrado: boolean;
-  persona?: Partial<DatosPersona>;
-  mensaje?: string;
+  nombres?: string;
+  apellidos?: string;
+  programa?: string;
+  semestre?: string;
 }
 
 /* ---------------------------------------------------------------------------
@@ -105,6 +122,12 @@ export interface PropsCampoBase {
   ayuda?: string;
   error?: string;
   deshabilitado?: boolean;
+  /**
+   * El campo tiene un valor traído de otro sistema y no debe editarse todavía.
+   * A diferencia de `deshabilitado`, conserva el contraste del texto y el foco:
+   * el dato se lee y se copia, sólo no se cambia.
+   */
+  soloLectura?: boolean;
   /** Clases para el contenedor del campo (útil para el ancho en la rejilla). */
   className?: string;
 }

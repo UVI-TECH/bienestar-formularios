@@ -11,5 +11,9 @@ export { default as CampoHora } from "./CampoHora";
 export { default as CampoTextarea } from "./CampoTextarea";
 export { default as CampoCedula } from "./CampoCedula";
 
+export { default as BloqueIdentificacion } from "./BloqueIdentificacion";
+export { useConsultaCedula } from "./useConsultaCedula";
+export type { EstadoConsulta } from "./useConsultaCedula";
+
 export { default as CampoContenedor, atributosControl } from "./CampoContenedor";
 export type { OpcionSelect } from "./CampoSelect";

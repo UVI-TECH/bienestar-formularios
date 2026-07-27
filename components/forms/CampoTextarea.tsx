@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 import type { PropsCampoBase } from "@/lib/types";
 import CampoContenedor, { atributosControl } from "./CampoContenedor";
 
@@ -24,6 +25,7 @@ export default function CampoTextarea({
   ayuda,
   error,
   deshabilitado,
+  soloLectura,
   className,
   onBlur,
 }: Props) {
@@ -44,9 +46,13 @@ export default function CampoTextarea({
         rows={filas}
         placeholder={marcador}
         maxLength={maxLength}
+        readOnly={soloLectura}
         disabled={deshabilitado}
         required={requerido}
-        className="control-base resize-y leading-relaxed"
+        className={cn(
+          "control-base resize-y leading-relaxed",
+          soloLectura && "control-solo-lectura",
+        )}
       />
     </CampoContenedor>
   );

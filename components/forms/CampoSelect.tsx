@@ -32,12 +32,43 @@ export default function CampoSelect({
   ayuda,
   error,
   deshabilitado,
+  soloLectura,
   className,
   onBlur,
 }: Props) {
+  // Un valor que viene de otro sistema (Smart Campus) puede no estar en el
+  // catálogo local. Se agrega como opción para no perderlo en silencio.
+  const enCatalogo = opciones.some((o) => normalizar(o).valor === valor);
+  const disponibles: readonly OpcionSelect[] =
+    valor && !enCatalogo ? [...opciones, valor] : opciones;
+
   // Un catálogo aún sin poblar (PROGRAMAS, ENFERMERAS) se muestra deshabilitado
   // y lo dice, en vez de ofrecer un desplegable vacío.
-  const sinOpciones = opciones.length === 0;
+  const sinOpciones = disponibles.length === 0;
+
+  // El `select` no admite `readonly`. Cuando el campo está bloqueado se muestra
+  // el valor en un control de sólo lectura: ya no es una lista para elegir,
+  // es un dato para leer, y así conserva el foco y se puede copiar.
+  if (soloLectura) {
+    return (
+      <CampoContenedor
+        name={name}
+        etiqueta={etiqueta}
+        requerido={requerido}
+        ayuda={ayuda}
+        error={error}
+        className={className}
+      >
+        <input
+          {...atributosControl(name, error, ayuda)}
+          type="text"
+          value={valor}
+          readOnly
+          className="control-base control-solo-lectura"
+        />
+      </CampoContenedor>
+    );
+  }
 
   return (
     <CampoContenedor
@@ -61,7 +92,7 @@ export default function CampoSelect({
           <option value="">
             {sinOpciones ? "Catálogo sin configurar" : textoVacio}
           </option>
-          {opciones.map((opcion) => {
+          {disponibles.map((opcion) => {
             const { valor: v, etiqueta: e } = normalizar(opcion);
             return (
               <option key={v} value={v}>

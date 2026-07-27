@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 import type { PropsCampoBase } from "@/lib/types";
 import CampoContenedor, { atributosControl } from "./CampoContenedor";
 
@@ -32,6 +33,7 @@ export default function CampoTexto({
   ayuda,
   error,
   deshabilitado,
+  soloLectura,
   className,
   onBlur,
 }: Props) {
@@ -55,9 +57,10 @@ export default function CampoTexto({
         autoComplete={autoComplete}
         autoCapitalize={autoCapitalize}
         inputMode={inputMode}
+        readOnly={soloLectura}
         disabled={deshabilitado}
         required={requerido}
-        className="control-base"
+        className={cn("control-base", soloLectura && "control-solo-lectura")}
       />
     </CampoContenedor>
   );
