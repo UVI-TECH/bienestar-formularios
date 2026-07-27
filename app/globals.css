@@ -1,26 +1,331 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================================
+   SISTEMA DE DISEÑO · Bienestar Universitario UNIAJC
+   ----------------------------------------------------------------------------
+   Este archivo es el ÚNICO lugar donde se definen los tokens visuales.
+   Ningún componente debe usar valores sueltos (hex, px arbitrarios, easings).
+
+   Los tokens de movimiento que JavaScript necesita (Motion) se re-declaran
+   como números en `lib/motion.ts`. Si cambia una duración aquí, cámbiela allá.
+   ============================================================================ */
+
+@theme {
+  /* --------------------------------------------------------------------------
+     COLOR · Azul institucional
+     PLACEHOLDER: reemplazar esta rampa por el azul oficial de la UNIAJC.
+     Basta con cambiar estos once valores; todo el sistema los hereda.
+     -------------------------------------------------------------------------- */
+  --color-inst-50: #f1f5f9;
+  --color-inst-100: #dfe9f2;
+  --color-inst-200: #bed3e5;
+  --color-inst-300: #91b3d1;
+  --color-inst-400: #5f8db6;
+  --color-inst-500: #3c6d9b;
+  --color-inst-600: #2a5480;
+  --color-inst-700: #1e4268; /* primario */
+  --color-inst-800: #17334f;
+  --color-inst-900: #12283d;
+  --color-inst-950: #0b1926;
+
+  /* --------------------------------------------------------------------------
+     COLOR · Neutros cálidos (papel institucional)
+     -------------------------------------------------------------------------- */
+  --color-neutro-50: #faf9f7;
+  --color-neutro-100: #f4f2ee;
+  --color-neutro-200: #e8e4dd;
+  --color-neutro-300: #d7d1c7;
+  --color-neutro-400: #aca496;
+  --color-neutro-500: #857c6e;
+  --color-neutro-600: #6a6155;
+  --color-neutro-700: #514a40;
+  --color-neutro-800: #3a342d;
+  --color-neutro-900: #24201b;
+
+  /* --------------------------------------------------------------------------
+     COLOR · Semántico
+     -------------------------------------------------------------------------- */
+  --color-exito-50: #eef5f1;
+  --color-exito-200: #bfdccd;
+  --color-exito-600: #2f7d5b;
+  --color-exito-700: #245f46;
+
+  --color-error-50: #fbeeec;
+  --color-error-200: #efc9c4;
+  --color-error-600: #a83a32;
+  --color-error-700: #8a2e27;
+
+  --color-aviso-50: #fbf3e5;
+  --color-aviso-200: #ecd7ab;
+  --color-aviso-700: #8a6314;
+
+  /* --------------------------------------------------------------------------
+     COLOR · Roles (usar estos, no la rampa cruda, en los componentes)
+     -------------------------------------------------------------------------- */
+  --color-lienzo: #faf9f7; /* fondo de página */
+  --color-superficie: #ffffff; /* tarjetas y formularios */
+  --color-superficie-tenue: #f7f5f2; /* encabezados de sección, filas alternas */
+  --color-borde: #e2ded6; /* borde por defecto */
+  --color-borde-fuerte: #cec7bb; /* borde de campos de captura */
+  --color-texto: #24201b; /* texto principal */
+  --color-texto-medio: #514a40; /* etiquetas y texto secundario */
+  --color-texto-tenue: #857c6e; /* ayudas y metadatos */
+
+  /* --------------------------------------------------------------------------
+     TIPOGRAFÍA
+     Serif para títulos (peso documental), sans humanista para captura,
+     mono para códigos de formato y cifras. Etiquetas siempre visibles.
+     -------------------------------------------------------------------------- */
+  --text-meta: 0.6875rem; /* 11px · códigos de formato, metadatos */
+  --text-meta--line-height: 1rem;
+  --text-meta--letter-spacing: 0.09em;
+
+  --text-etiqueta: 0.875rem; /* 14px · labels, legibles de pie frente a la tablet */
+  --text-etiqueta--line-height: 1.25rem;
+  --text-etiqueta--letter-spacing: 0.005em;
+
+  --text-ayuda: 0.8125rem; /* 13px · ayudas y mensajes de error */
+  --text-ayuda--line-height: 1.15rem;
+
+  --text-campo: 1rem; /* 16px · valor dentro del control (evita zoom en iOS) */
+  --text-campo--line-height: 1.5rem;
+
+  --text-cuerpo: 0.9375rem; /* 15px */
+  --text-cuerpo--line-height: 1.5rem;
+
+  --text-seccion: 1rem; /* 16px · título de sección dentro de un formulario */
+  --text-seccion--line-height: 1.5rem;
+
+  --text-subtitulo: 1.125rem; /* 18px · título de tarjeta en el índice */
+  --text-subtitulo--line-height: 1.625rem;
+
+  --text-titulo: 1.5rem; /* 24px · título de formulario */
+  --text-titulo--line-height: 2rem;
+  --text-titulo--letter-spacing: -0.01em;
+
+  --text-portada: 2rem; /* 32px · título del índice */
+  --text-portada--line-height: 2.5rem;
+  --text-portada--letter-spacing: -0.015em;
+
+  /* --------------------------------------------------------------------------
+     FORMA Y PROFUNDIDAD · sobria, sin brillos ni cristales
+     -------------------------------------------------------------------------- */
+  --radius-campo: 0.375rem;
+  --radius-tarjeta: 0.625rem;
+  --radius-chip: 0.25rem;
+
+  --shadow-tarjeta: 0 1px 2px rgba(36, 32, 27, 0.05);
+  --shadow-elevada:
+    0 2px 4px -1px rgba(36, 32, 27, 0.06), 0 10px 20px -8px rgba(36, 32, 27, 0.1);
+  --shadow-barra: 0 -1px 3px rgba(36, 32, 27, 0.05);
+
+  /* --------------------------------------------------------------------------
+     MOVIMIENTO · funcional, 150–250 ms, siempre ease-out
+     -------------------------------------------------------------------------- */
+  --ease-salida: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur-rapida: 150ms;
+  --dur-base: 200ms;
+  --dur-media: 250ms;
+
+  /* Hace que TODA utilidad `transition-*` de Tailwind herede estos tokens. */
+  --default-transition-duration: 200ms;
+  --default-transition-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--fuente-sans);
+  --font-serif: var(--fuente-serif);
+  --font-mono: var(--fuente-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Tokens que no generan utilidades de Tailwind, sólo se usan dentro de CSS. */
+:root {
+  /* Altura mínima de control: cómoda para tablet de pie y para el mouse. */
+  --alto-control: 2.875rem; /* 46px */
+}
+
+/* ============================================================================
+   BASE
+   ============================================================================ */
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-lienzo);
+    color: var(--color-texto);
+    font-family: var(--font-sans);
+    font-size: var(--text-cuerpo);
+    line-height: var(--text-cuerpo--line-height);
+  }
+
+  /* Un único anillo de foco en todo el sistema: visible y sobrio. */
+  :focus-visible {
+    outline: 2px solid var(--color-inst-600);
+    outline-offset: 2px;
+    border-radius: var(--radius-chip);
+  }
+
+  /* Cifras tabulares en toda captura de datos: cédulas, horas, edades. */
+  input,
+  select,
+  textarea {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::placeholder {
+    color: var(--color-texto-tenue);
+    opacity: 1;
+  }
+
+  /* El indicador nativo del select se reemplaza por el del sistema. */
+  select {
+    appearance: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================================
+   COMPONENTES DEL SISTEMA
+   ============================================================================ */
+
+@layer components {
+  /* Superficie de captura compartida por input / select / textarea. */
+  .control-base {
+    width: 100%;
+    min-height: var(--alto-control);
+    border-radius: var(--radius-campo);
+    border: 1px solid var(--color-borde-fuerte);
+    background-color: var(--color-superficie);
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-campo);
+    line-height: var(--text-campo--line-height);
+    color: var(--color-texto);
+    transition-property: border-color, box-shadow, background-color;
+    transition-duration: var(--dur-rapida);
+    transition-timing-function: var(--ease-salida);
+  }
+
+  .control-base:hover:not(:disabled):not([aria-invalid="true"]) {
+    border-color: var(--color-neutro-400);
+  }
+
+  .control-base:focus {
+    outline: none;
+    border-color: var(--color-inst-600);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-inst-600) 16%, transparent);
+  }
+
+  .control-base:disabled {
+    background-color: var(--color-neutro-100);
+    color: var(--color-texto-tenue);
+    cursor: not-allowed;
+  }
+
+  .control-base[aria-invalid="true"] {
+    border-color: var(--color-error-600);
+  }
+
+  .control-base[aria-invalid="true"]:focus {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error-600) 16%, transparent);
+  }
+
+  /* Botón sólido institucional. */
+  .boton-primario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--alto-control);
+    padding: 0 1.25rem;
+    border-radius: var(--radius-campo);
+    background-color: var(--color-inst-700);
+    color: #ffffff;
+    font-size: var(--text-campo);
+    font-weight: 500;
+    transition-property: background-color, color, box-shadow, opacity;
+    transition-duration: var(--dur-rapida);
+    transition-timing-function: var(--ease-salida);
+  }
+
+  .boton-primario:hover:not(:disabled) {
+    background-color: var(--color-inst-800);
+  }
+
+  .boton-primario:disabled {
+    background-color: var(--color-neutro-300);
+    color: var(--color-neutro-600);
+    cursor: not-allowed;
+  }
+
+  /* Botón secundario de contorno. */
+  .boton-secundario {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: var(--alto-control);
+    padding: 0 1.25rem;
+    border-radius: var(--radius-campo);
+    border: 1px solid var(--color-borde-fuerte);
+    background-color: var(--color-superficie);
+    color: var(--color-texto-medio);
+    font-size: var(--text-campo);
+    font-weight: 500;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--dur-rapida);
+    transition-timing-function: var(--ease-salida);
+  }
+
+  .boton-secundario:hover:not(:disabled) {
+    background-color: var(--color-neutro-100);
+    border-color: var(--color-neutro-400);
+    color: var(--color-texto);
+  }
+
+  .boton-secundario:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Franja de mensaje bajo un campo. Reserva la altura de una línea para que
+     la aparición del error no desplace el resto del formulario. */
+  .franja-mensaje {
+    min-height: var(--text-ayuda--line-height);
+  }
+
+  /* Textura de papel pautado; se tiñe con el color de texto del contenedor,
+     así funciona igual sobre la banda azul y sobre papel claro. */
+  .trama-pauta {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      color-mix(in srgb, currentColor 10%, transparent) 0 1px,
+      transparent 1px 9px
+    );
+  }
+}
+
+/* ============================================================================
+   ACCESIBILIDAD · prefers-reduced-motion
+   Red de seguridad para CSS. Motion, además, consulta useReducedMotion() en JS
+   para no animar altura ni trazos.
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* El girador comunica "en proceso": si se congela, deja de informar.
+     Se conserva, pero lento y sin parpadeo. */
+  .girador {
+    animation-duration: 1600ms !important;
+    animation-iteration-count: infinite !important;
+  }
 }
