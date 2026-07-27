@@ -7,9 +7,13 @@
  */
 
 export const SEDES = [
-  "Sede Principal",
+  "Sede Norte",
   "Sede Sur",
-  "Sede Estación",
+  "Sede Sameco",
+  "Sede Estación 1",
+  "Sede Estación 2",
+  "Sede Estación 3",
+  "Sede Estación 4",
 ] as const;
 
 export const TIPOS_PERSONA = [

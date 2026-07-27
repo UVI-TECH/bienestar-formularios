@@ -111,11 +111,26 @@ Cuerpo:     { cedula: string, tipoPersona?: string }
 Respuesta:  { encontrado: boolean, nombres?, apellidos?, programa?, semestre? }
 ```
 
-Hacia Smart Campus se envía `{ documento, peunId }` y se recibe
-`{ nombre, apellido, programa, codigoPrograma, facultad, correoInstitucional,
-correoPersonal, grupos, unidadDocente, usuario, documentoIdentidad }`. De ahí
-sólo se publican **nombres, apellidos y programa**: los correos, la facultad y
-los grupos no salen del servidor porque el formulario no los necesita.
+Hacia Smart Campus se envía `{ documento, peunId }` y se recibe un sobre
+`{ codigo, mensaje, valor }`, con la persona dentro de `valor`:
+
+```json
+{ "codigo": 200, "mensaje": "Estudiante obtenido con éxito",
+  "valor": { "nombre": "…", "apellido": "…", "programa": "…",
+             "codigoPrograma": "…", "facultad": "…", "correoInstitucional": "…",
+             "correoPersonal": "…", "grupos": [], "unidadDocente": "…",
+             "usuario": "…", "documentoIdentidad": "…" } }
+```
+
+De ahí sólo se publican **nombres, apellidos y programa**: los correos, la
+facultad y los grupos no salen del servidor porque el formulario no los
+necesita. `valor: null` con código 200 significa "sin registro para ese
+documento y ese periodo", y se traduce a `encontrado: false`.
+
+> El Swagger del servicio declara la `Persona` como cuerpo directo del 200, pero
+> el servicio responde con el sobre. `lib/smartcampus.ts` admite las dos formas
+> porque documentación y comportamiento no coinciden.
+> Documentación viva: `http://smartcampus.uniajc.edu.co:9000/<contexto>/swagger-ui.html`
 
 **El servicio no devuelve el semestre**, así que ese campo lo elige siempre
 quien registra, incluso cuando la consulta encuentra a la persona.

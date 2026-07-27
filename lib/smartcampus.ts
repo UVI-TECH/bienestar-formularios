@@ -108,10 +108,10 @@ export async function consultarSimulado(
 export class ErrorSmartCampus extends Error {}
 
 /**
- * Respuesta documentada de `POST /api/v1/aulas-virtuales/estudiantes/consultar`.
+ * `Persona`, el objeto que describe al estudiante.
  *
- * Se declara completa para dejar constancia de lo que entrega el servicio,
- * pero de aquí sólo salen cuatro campos: correos, facultad, código de programa,
+ * Se declara completo para dejar constancia de lo que entrega el servicio,
+ * pero de aquí sólo salen tres campos: correos, facultad, código de programa,
  * grupos, unidad docente y usuario no se publican al navegador porque el
  * formulario no los necesita.
  */
@@ -129,8 +129,47 @@ interface EstudianteSmartCampus {
   usuario?: string;
 }
 
+/**
+ * `SimpleObjectResponse`, el sobre con que el servicio estandariza todas sus
+ * respuestas. La `Persona` viaja dentro de `valor`.
+ */
+interface SobreSmartCampus {
+  codigo?: number;
+  mensaje?: string;
+  valor?: unknown;
+}
+
 function limpiar(valor: unknown): string | undefined {
   return typeof valor === "string" && valor.trim() ? valor.trim() : undefined;
+}
+
+/**
+ * Saca la `Persona` de la respuesta.
+ *
+ * En la práctica el servicio responde `{ codigo, mensaje, valor }` y la persona
+ * está en `valor`; su propio Swagger, en cambio, declara la `Persona` como
+ * cuerpo directo del 200. Se admiten las dos formas porque la documentación y
+ * el comportamiento no coinciden y no conviene depender de cuál gane.
+ *
+ * `valor` también puede traer texto (en las respuestas de error trae la ruta),
+ * así que se exige que sea un objeto.
+ */
+function extraerPersona(carga: unknown): EstudianteSmartCampus | undefined {
+  if (!carga || typeof carga !== "object" || Array.isArray(carga)) return undefined;
+
+  const sobre = carga as SobreSmartCampus;
+
+  if ("valor" in sobre) {
+    const valor = sobre.valor;
+    // `valor: null` con código 200 es la forma en que el servicio dice que no
+    // hay registro para ese documento y ese periodo.
+    if (!valor || typeof valor !== "object" || Array.isArray(valor)) {
+      return undefined;
+    }
+    return valor as EstudianteSmartCampus;
+  }
+
+  return carga as EstudianteSmartCampus;
 }
 
 /**
@@ -141,9 +180,8 @@ function limpiar(valor: unknown): string | undefined {
  * que lo seleccione quien registra.
  */
 export function mapearRespuesta(carga: unknown): RespuestaConsultaCedula {
-  if (!carga || typeof carga !== "object") return { encontrado: false };
-
-  const datos = carga as EstudianteSmartCampus;
+  const datos = extraerPersona(carga);
+  if (!datos) return { encontrado: false };
 
   const nombres = limpiar(datos.nombre);
   const apellidos = limpiar(datos.apellido);
@@ -157,6 +195,13 @@ export function mapearRespuesta(carga: unknown): RespuestaConsultaCedula {
     apellidos,
     programa: limpiar(datos.programa),
   };
+}
+
+/** El servicio puede reportar un fallo suyo con HTTP 200 y `codigo` 4xx/5xx. */
+function codigoDeFallo(carga: unknown): number | undefined {
+  if (!carga || typeof carga !== "object") return undefined;
+  const codigo = (carga as SobreSmartCampus).codigo;
+  return typeof codigo === "number" && codigo >= 400 ? codigo : undefined;
 }
 
 export async function consultarSmartCampus(
@@ -206,6 +251,11 @@ export async function consultarSmartCampus(
     carga = await respuesta.json();
   } catch {
     throw new ErrorSmartCampus("Smart Campus devolvió una respuesta ilegible.");
+  }
+
+  const fallo = codigoDeFallo(carga);
+  if (fallo) {
+    throw new ErrorSmartCampus(`Smart Campus reportó el código ${fallo}.`);
   }
 
   return mapearRespuesta(carga);
