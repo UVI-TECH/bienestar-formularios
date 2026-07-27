@@ -128,6 +128,11 @@ export interface PropsCampoBase {
    * el dato se lee y se copia, sólo no se cambia.
    */
   soloLectura?: boolean;
+  /**
+   * El campo acaba de rellenarse solo (consulta por documento). Dispara un
+   * anillo breve que se desvanece, para que se note qué cambió sin buscarlo.
+   */
+  resaltado?: boolean;
   /** Clases para el contenedor del campo (útil para el ancho en la rejilla). */
   className?: string;
 }

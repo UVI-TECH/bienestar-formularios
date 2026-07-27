@@ -34,6 +34,7 @@ export default function CampoTexto({
   error,
   deshabilitado,
   soloLectura,
+  resaltado,
   className,
   onBlur,
 }: Props) {
@@ -60,7 +61,11 @@ export default function CampoTexto({
         readOnly={soloLectura}
         disabled={deshabilitado}
         required={requerido}
-        className={cn("control-base", soloLectura && "control-solo-lectura")}
+        className={cn(
+          "control-base",
+          soloLectura && "control-solo-lectura",
+          resaltado && "campo-resaltado",
+        )}
       />
     </CampoContenedor>
   );

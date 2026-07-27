@@ -84,6 +84,23 @@ export function useConsultaCedula({ onEncontrado }: Opciones) {
     setCedulaConsultada("");
   }, []);
 
+  /**
+   * Avisa al hook de que el documento cambió y deja la consulta en reposo.
+   *
+   * Devuelve `true` cuando los datos que hay en pantalla fueron traídos para
+   * OTRO documento y por lo tanto deben borrarse: dejarlos sería peor que no
+   * tenerlos, porque se podría registrar la atención de una persona a nombre
+   * de otra. Quien llama es responsable de limpiar sus propios campos.
+   */
+  const alCambiarCedula = useCallback(
+    (cedulaNueva: string): boolean => {
+      const invalidados = Boolean(cedulaConsultada) && cedulaConsultada !== cedulaNueva;
+      if (invalidados || estado !== "inactivo") reiniciar();
+      return invalidados;
+    },
+    [cedulaConsultada, estado, reiniciar],
+  );
+
   return {
     estado,
     mensaje,
@@ -93,5 +110,6 @@ export function useConsultaCedula({ onEncontrado }: Opciones) {
     buscar,
     editarManualmente,
     reiniciar,
+    alCambiarCedula,
   };
 }

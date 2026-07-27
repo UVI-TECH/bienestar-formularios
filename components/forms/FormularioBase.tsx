@@ -6,7 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import CheckAnimado from "@/components/ui/CheckAnimado";
 import CodigoFormato from "@/components/ui/CodigoFormato";
 import { variantesError, variantesPanel } from "@/lib/motion";
-import type { EstadoEnvio, Formato } from "@/lib/types";
+import type { ErroresFormulario, EstadoEnvio, Formato } from "@/lib/types";
 import BotonEnviar from "./BotonEnviar";
 
 /** Pausa entre el visto del botón y la pantalla de confirmación. */
@@ -17,6 +17,13 @@ const MENSAJE_ERROR_GENERICO =
 
 interface Props {
   formato: Formato;
+  /**
+   * Revisa el formulario antes de enviarlo. Devuelve los errores por campo
+   * (vacío si todo está bien); si hay alguno no se envía nada y el foco salta
+   * al primer campo marcado. Se ejecuta antes de mostrar el estado "enviando",
+   * para que un formulario incompleto no simule que se está guardando.
+   */
+  validar?: () => ErroresFormulario;
   /**
    * Envía el registro. Debe lanzar un `Error` si falla; su mensaje se muestra
    * en la barra de acciones.
@@ -41,6 +48,7 @@ interface Props {
  */
 export default function FormularioBase({
   formato,
+  validar,
   onEnviar,
   onReiniciar,
   children,
@@ -67,6 +75,24 @@ export default function FormularioBase({
       evento.preventDefault();
       if (estado === "enviando" || estado === "exito") return;
 
+      if (validar) {
+        const errores = validar();
+        if (Object.keys(errores).length > 0) {
+          setEstado("error");
+          setMensajeError(
+            "Revise los campos marcados: faltan datos obligatorios.",
+          );
+          // El foco salta al primer campo con error, que puede estar fuera de
+          // la pantalla en un formulario largo.
+          requestAnimationFrame(() => {
+            formularioRef.current
+              ?.querySelector<HTMLElement>('[aria-invalid="true"]')
+              ?.focus();
+          });
+          return;
+        }
+      }
+
       setEstado("enviando");
       setMensajeError("");
 
@@ -87,7 +113,7 @@ export default function FormularioBase({
         setEstado("error");
       }
     },
-    [estado, onEnviar, movimientoReducido],
+    [estado, validar, onEnviar, movimientoReducido],
   );
 
   function registrarOtro() {
@@ -146,6 +172,14 @@ export default function FormularioBase({
               key="formulario"
               ref={formularioRef}
               onSubmit={manejarEnvio}
+              onInput={() => {
+                // En cuanto se empieza a corregir, el aviso de la barra deja
+                // de ser cierto. Los errores por campo los limpia cada campo.
+                if (estado === "error") {
+                  setEstado("inactivo");
+                  setMensajeError("");
+                }
+              }}
               noValidate
               variants={variantesPanel}
               initial="entra"

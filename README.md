@@ -17,7 +17,9 @@ app/
   layout.tsx                 Fuentes, metadatos, encabezado y pie institucionales
   page.tsx                   Índice con las tarjetas hacia los cuatro formularios
   globals.css                SISTEMA DE DISEÑO: todos los tokens visuales
+  enfermeria/page.tsx        Formulario Asistencia a Enfermería (BH-F-013)
   api/lookup/route.ts        POST · consulta de estudiante por documento
+  api/submit/[formato]/      POST · entrega del registro a Power Automate
 components/
   forms/
     FormularioBase.tsx       Envoltura: encabezado, estado de envío, confirmación
@@ -44,14 +46,16 @@ lib/
   smartcampus.ts             Cliente del servicio externo (sólo servidor)
   limitadorTasa.ts           Límite de consultas por IP
   lookup.ts                  Cliente de /api/lookup (navegador)
+  envio.ts                   Saneamiento del registro (sólo servidor)
+  enviarRegistro.ts          Cliente de /api/submit (navegador)
   fechas.ts                  Fecha/hora en zona America/Bogota
   validacion.ts              Reglas de validación reutilizables
   motion.ts                  Tokens de movimiento para JavaScript
   cn.ts
 ```
 
-Los formularios (`/enfermeria`, `/consulta-medica`, `/tamizaje`, `/poliza`) aún
-no existen: esta entrega es el índice, la base y los componentes.
+`/enfermeria` está implementado. Faltan `/consulta-medica`, `/tamizaje` y
+`/poliza`; los tres heredan el sistema de diseño, `FormularioBase` y los campos.
 
 ## Sistema de diseño
 
@@ -100,12 +104,21 @@ sincronizados: `app/globals.css` (`--dur-*`, `--ease-salida`) para CSS, y
 ## Consulta por documento · `POST /api/lookup`
 
 Trae los datos de un estudiante desde el servicio REST de la oficina Smart
-Campus (`estudiantes/consultar`, sin autenticación).
+Campus (`POST /api/v1/aulas-virtuales/estudiantes/consultar`, sin autenticación).
 
 ```
 Cuerpo:     { cedula: string, tipoPersona?: string }
 Respuesta:  { encontrado: boolean, nombres?, apellidos?, programa?, semestre? }
 ```
+
+Hacia Smart Campus se envía `{ documento, peunId }` y se recibe
+`{ nombre, apellido, programa, codigoPrograma, facultad, correoInstitucional,
+correoPersonal, grupos, unidadDocente, usuario, documentoIdentidad }`. De ahí
+sólo se publican **nombres, apellidos y programa**: los correos, la facultad y
+los grupos no salen del servidor porque el formulario no los necesita.
+
+**El servicio no devuelve el semestre**, así que ese campo lo elige siempre
+quien registra, incluso cuando la consulta encuentra a la persona.
 
 Esa forma de respuesta **no cambia nunca**. Las condiciones de error viajan en
 el código HTTP y el cuerpo sigue siendo `{ encontrado: false }`, para que un
@@ -146,22 +159,44 @@ cédula, con 400 ms de latencia simulada. **Las cédulas terminadas en 0 respond
 Un programa que venga de Smart Campus y no esté en el catálogo local se agrega
 como opción del `CampoSelect` en lugar de perderse en silencio.
 
+En `/enfermeria` la consulta sólo se ofrece cuando el tipo de persona es
+**Estudiante**: para docentes y administrativos el botón "Buscar" ni aparece,
+porque Smart Campus no los conoce.
+
+## Envío de registros · `POST /api/submit/[formato]`
+
+Entrega el registro al flujo de Power Automate que lo agrega como fila en Excel.
+Formatos aceptados: `enfermeria`, `consulta-medica`, `tamizaje`, `poliza`.
+
+El cuerpo son claves planas en snake_case; el servidor agrega `registrado_en`
+(ISO, reloj del servidor) y descarta cualquier clave con formato inesperado,
+objeto o arreglo, para que el navegador no pueda inyectar estructuras en el
+flujo. La URL del flujo vive en `PA_URL_<FORMATO>` y **nunca sale del servidor**:
+ni su valor ni el cuerpo de error del flujo se reflejan en la respuesta.
+
+| Código | Situación                                        |
+| ------ | ------------------------------------------------ |
+| `200`  | `{ ok: true }` · registro entregado              |
+| `400`  | Cuerpo ilegible o sin campos utilizables          |
+| `404`  | Formato desconocido                               |
+| `502`  | El flujo falló, no respondió o no está configurado |
+
+Con `SUBMIT_MOCK=true` nada sale a la red: el registro se escribe en la consola
+del servidor y se responde éxito tras 500 ms.
+
 ## Pendientes conocidos
 
-- `PROGRAMAS` y `ENFERMERAS` en `lib/catalogos.ts` están vacíos. Mientras lo
-  estén, `CampoSelect` se muestra deshabilitado con el texto
-  "Catálogo sin configurar" en lugar de un desplegable vacío.
 - **Accidente por Póliza Estudiantil** es un instrumento nuevo y todavía no
   tiene código en Isolución. En `lib/formatos.ts` lleva `sello` en lugar de
   `codigo`/`version`, y se muestra con borde punteado. Cuando Calidad le asigne
   código, cámbielo allí: el resto de la aplicación se adapta sola.
 - El azul institucional es un marcador de posición.
-- **`SMARTCAMPUS_PEUN_ID` está sin definir** (hay que pedírselo a la oficina
-  Smart Campus), así que el proyecto corre en modo simulado.
-- **El mapeo de la respuesta de Smart Campus es una conjetura.** En
-  `lib/smartcampus.ts`, `mapearRespuesta` prueba varios nombres de clave
-  (`nombres`/`nombre`/`primerNombre`, etc.) porque no conocemos el contrato
-  real. Al recibirlo, hay que dejar sólo las claves correctas.
+- **Falta el host de Smart Campus.** Conocemos la ruta, el cuerpo y la
+  respuesta, y el código ya los implementa, pero `SMARTCAMPUS_URL` necesita la
+  URL completa. Hasta entonces el proyecto corre con `SMARTCAMPUS_MOCK=true` y
+  la integración real no se ha podido probar contra el servicio.
+- **Faltan las URL de los flujos de Power Automate** (`PA_URL_*`), así que el
+  envío corre con `SUBMIT_MOCK=true`.
 - **El límite de consultas vive en memoria del proceso.** Se reinicia en cada
   despliegue y, con varias instancias, cada una lleva su propia cuenta. Antes de
   producción hay que migrarlo a Upstash Redis (`lib/limitadorTasa.ts` tiene el

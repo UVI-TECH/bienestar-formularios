@@ -223,6 +223,22 @@
     cursor: not-allowed;
   }
 
+  /* Un campo que acaba de rellenarse solo. El anillo señala dónde miró el
+     sistema y se apaga enseguida: si se quedara, dejaría de ser información.
+     Es un anillo y no un fondo para no pelear con el de sólo lectura. */
+  @keyframes resaltar-campo {
+    from {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-inst-500) 30%, transparent);
+    }
+    to {
+      box-shadow: 0 0 0 3px transparent;
+    }
+  }
+
+  .campo-resaltado {
+    animation: resaltar-campo 900ms var(--ease-salida) forwards;
+  }
+
   /* Campo con un dato traído de otro sistema: se lee y se copia, no se edita.
      A diferencia de :disabled conserva el contraste del texto, porque el dato
      sí importa; sólo el fondo indica que está bloqueado. */

@@ -34,8 +34,31 @@ export const SEMESTRES = [
   "10",
 ] as const;
 
-/** PENDIENTE: cargar los programas académicos de la UNIAJC. */
-export const PROGRAMAS: readonly string[] = [];
+/** Programas académicos de la UNIAJC. */
+export const PROGRAMAS: readonly string[] = [
+  "Administración de Empresas",
+  "Contaduría Pública",
+  "Mercadeo y Publicidad",
+  "Tecnología. Contabilidad Sistematizada",
+  "Tecnología. Gestión Empresarial",
+  "Diseño Visual",
+  "Comunicación Social",
+  "Trabajo Social",
+  "Ingeniería de Sistemas",
+  "Ingeniería en Electrónica",
+  "Ingeniería Industrial",
+  "Tecnología. Sistemas de Información",
+  "Tecnología. Electrónica Industrial",
+  "Tecnología. Producción Industrial",
+  "Administración en Salud",
+  "Administración en Seguridad y Salud en el Trabajo",
+  "Licenciatura en Educación Infantil",
+  "Licenciatura en Ciencias del Deporte y la Educación Física",
+];
 
-/** PENDIENTE: cargar el personal de enfermería del área de salud. */
-export const ENFERMERAS: readonly string[] = [];
+/** Personal de enfermería del área de salud. */
+export const ENFERMERAS: readonly string[] = [
+  "CIELO ESPERANZA ESCOBAR MAYA",
+  "DIANA LUCÍA GÓMEZ GÁLVEZ",
+  "ANYELINE COLMENARES",
+];

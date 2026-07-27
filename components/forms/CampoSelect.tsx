@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/cn";
 import type { PropsCampoBase } from "@/lib/types";
 import CampoContenedor, { atributosControl } from "./CampoContenedor";
 
@@ -33,6 +34,7 @@ export default function CampoSelect({
   error,
   deshabilitado,
   soloLectura,
+  resaltado,
   className,
   onBlur,
 }: Props) {
@@ -64,7 +66,10 @@ export default function CampoSelect({
           type="text"
           value={valor}
           readOnly
-          className="control-base control-solo-lectura"
+          className={cn(
+            "control-base control-solo-lectura",
+            resaltado && "campo-resaltado",
+          )}
         />
       </CampoContenedor>
     );
@@ -87,7 +92,7 @@ export default function CampoSelect({
           onBlur={onBlur}
           disabled={deshabilitado || sinOpciones}
           required={requerido}
-          className="control-base pr-10"
+          className={cn("control-base pr-10", resaltado && "campo-resaltado")}
         >
           <option value="">
             {sinOpciones ? "Catálogo sin configurar" : textoVacio}

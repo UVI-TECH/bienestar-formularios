@@ -1,5 +1,6 @@
 import "server-only";
 
+import { PROGRAMAS } from "./catalogos";
 import type { RespuestaConsultaCedula } from "./types";
 
 /**
@@ -46,14 +47,8 @@ const APELLIDOS = [
   "Herrera Cifuentes",
 ];
 
-const PROGRAMAS_SIMULADOS = [
-  "Tecnología en Sistemas de Información",
-  "Ingeniería Industrial",
-  "Administración de Empresas",
-  "Tecnología en Electrónica Industrial",
-  "Contaduría Pública",
-  "Trabajo Social",
-];
+/** Se toman del catálogo real para que el simulador devuelva programas válidos. */
+const PROGRAMAS_SIMULADOS = PROGRAMAS.length > 0 ? PROGRAMAS : ["Sin programa"];
 
 /** Hash determinista de la cédula: la misma cédula da siempre la misma persona. */
 function huella(cedula: string): number {
@@ -80,7 +75,11 @@ function indice(base: number, sal: number, largo: number): number {
 }
 
 /**
- * Respuesta simulada mientras no tengamos el `peunId` real.
+ * Respuesta simulada, para desarrollar sin depender del servicio.
+ *
+ * Devuelve exactamente los mismos campos que el servicio real —es decir, **sin
+ * semestre**, porque Smart Campus no lo entrega— para que el formulario no se
+ * comporte distinto al cambiar de modo.
  *
  * Convención para poder probar el camino de "no encontrado" sin tocar código:
  * **las cédulas terminadas en 0 se comportan como no registradas**.
@@ -99,7 +98,6 @@ export async function consultarSimulado(
     nombres: NOMBRES[indice(base, 1, NOMBRES.length)],
     apellidos: APELLIDOS[indice(base, 2, APELLIDOS.length)],
     programa: PROGRAMAS_SIMULADOS[indice(base, 3, PROGRAMAS_SIMULADOS.length)],
-    semestre: String(indice(base, 4, 10) + 1),
   };
 }
 
@@ -110,83 +108,66 @@ export async function consultarSimulado(
 export class ErrorSmartCampus extends Error {}
 
 /**
- * Extrae un campo de texto probando varios nombres de clave.
+ * Respuesta documentada de `POST /api/v1/aulas-virtuales/estudiantes/consultar`.
  *
- * TODO(Smart Campus): confirmar con la oficina el contrato real de
- * `estudiantes/consultar` y dejar sólo las claves correctas. Mientras tanto se
- * prueban las variantes más probables para que el mapeo no falle en silencio.
+ * Se declara completa para dejar constancia de lo que entrega el servicio,
+ * pero de aquí sólo salen cuatro campos: correos, facultad, código de programa,
+ * grupos, unidad docente y usuario no se publican al navegador porque el
+ * formulario no los necesita.
  */
-function texto(
-  origen: Record<string, unknown>,
-  claves: readonly string[],
-): string | undefined {
-  for (const clave of claves) {
-    const valor = origen[clave];
-    if (typeof valor === "string" && valor.trim()) return valor.trim();
-    if (typeof valor === "number") return String(valor);
-  }
-  return undefined;
+interface EstudianteSmartCampus {
+  apellido?: string;
+  codigoPrograma?: string;
+  correoInstitucional?: string;
+  correoPersonal?: string;
+  documentoIdentidad?: string;
+  facultad?: string;
+  grupos?: Array<{ codigo?: string; franja?: string }>;
+  nombre?: string;
+  programa?: string;
+  unidadDocente?: string;
+  usuario?: string;
 }
 
-/** Desenvuelve envoltorios comunes (`data`, `estudiante`, `result`). */
-function nucleo(carga: unknown): Record<string, unknown> | undefined {
-  if (!carga || typeof carga !== "object") return undefined;
-  const objeto = carga as Record<string, unknown>;
-
-  for (const envoltorio of ["data", "estudiante", "result", "datos"]) {
-    const interior = objeto[envoltorio];
-    if (interior && typeof interior === "object" && !Array.isArray(interior)) {
-      return interior as Record<string, unknown>;
-    }
-    if (Array.isArray(interior) && interior.length > 0) {
-      const primero = interior[0];
-      if (primero && typeof primero === "object") {
-        return primero as Record<string, unknown>;
-      }
-    }
-  }
-
-  return objeto;
+function limpiar(valor: unknown): string | undefined {
+  return typeof valor === "string" && valor.trim() ? valor.trim() : undefined;
 }
 
 /**
  * Traduce la respuesta de Smart Campus a nuestra forma pública.
  * Todo lo que no esté en `RespuestaConsultaCedula` se descarta aquí.
+ *
+ * Nota: el servicio **no devuelve el semestre**, así que ese campo queda para
+ * que lo seleccione quien registra.
  */
 export function mapearRespuesta(carga: unknown): RespuestaConsultaCedula {
-  const datos = nucleo(carga);
-  if (!datos) return { encontrado: false };
+  if (!carga || typeof carga !== "object") return { encontrado: false };
 
-  const nombres = texto(datos, ["nombres", "nombre", "primerNombre"]);
-  const apellidos = texto(datos, [
-    "apellidos",
-    "apellido",
-    "primerApellido",
-    "primer_apellido",
-  ]);
-  const programa = texto(datos, [
-    "programa",
-    "programaAcademico",
-    "programa_academico",
-    "nombrePrograma",
-  ]);
-  const semestre = texto(datos, ["semestre", "semestreActual", "nivel"]);
+  const datos = carga as EstudianteSmartCampus;
+
+  const nombres = limpiar(datos.nombre);
+  const apellidos = limpiar(datos.apellido);
 
   // Sin nombre no hay nada que autocompletar: se trata como no encontrado.
   if (!nombres && !apellidos) return { encontrado: false };
 
-  return { encontrado: true, nombres, apellidos, programa, semestre };
+  return {
+    encontrado: true,
+    nombres,
+    apellidos,
+    programa: limpiar(datos.programa),
+  };
 }
 
 export async function consultarSmartCampus(
   cedula: string,
 ): Promise<RespuestaConsultaCedula> {
   const url = process.env.SMARTCAMPUS_URL;
-  const peunId = process.env.SMARTCAMPUS_PEUN_ID;
+  const peunId = Number(process.env.SMARTCAMPUS_PEUN_ID);
 
-  if (!url || !peunId) {
+  if (!url || !Number.isFinite(peunId)) {
     throw new ErrorSmartCampus(
-      "Falta configurar SMARTCAMPUS_URL o SMARTCAMPUS_PEUN_ID.",
+      "Falta configurar SMARTCAMPUS_URL, o SMARTCAMPUS_PEUN_ID no es numérico.",
     );
   }
 
@@ -198,7 +179,8 @@ export async function consultarSmartCampus(
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      body: JSON.stringify({ cedula, peunId }),
+      // El servicio espera `documento`, no `cedula`, y `peunId` numérico.
+      body: JSON.stringify({ documento: cedula, peunId }),
       signal: AbortSignal.timeout(TIEMPO_LIMITE_MS),
       cache: "no-store",
     });

@@ -58,13 +58,8 @@ export default function BloqueIdentificacion({
   }
 
   function cambiarCedula(cedula: string) {
-    const consultada = consulta.cedulaConsultada;
-
-    // Si en pantalla hay datos traídos para OTRO documento, se descartan.
-    // Dejarlos sería peor que no tenerlos: se podría registrar la atención de
-    // una persona a nombre de otra.
-    if (consultada && consultada !== cedula) {
-      consulta.reiniciar();
+    // El hook decide si los datos en pantalla siguen correspondiendo.
+    if (consulta.alCambiarCedula(cedula)) {
       onChange({
         ...valor,
         cedula,
@@ -76,7 +71,6 @@ export default function BloqueIdentificacion({
       return;
     }
 
-    if (consulta.estado !== "inactivo") consulta.reiniciar();
     actualizar("cedula", cedula);
   }
 
