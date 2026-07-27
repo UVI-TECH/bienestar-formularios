@@ -1,0 +1,20 @@
+# Normaliza los finales de línea: en el repositorio siempre LF, y también en
+# la copia de trabajo, sin importar el sistema operativo. Evita que Windows,
+# macOS y Linux generen diferencias falsas en archivos que nadie tocó.
+* text=auto eol=lf
+
+# Archivos que git no debe tratar como texto.
+*.ico binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+
+# Diffs de package-lock.json: útiles de leer, pero no de revisar a mano.
+package-lock.json linguist-generated=true -diff
