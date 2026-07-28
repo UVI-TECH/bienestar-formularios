@@ -63,6 +63,15 @@ export const variantesError: Variants = {
   visible: { opacity: 1, y: 0, transition: transicionRapida },
 };
 
+/**
+ * Relevo de un texto que cambia por sí solo (la clasificación del IMC, por
+ * ejemplo). Mismo gesto que el error, pero sin connotación de aviso.
+ */
+export const variantesFundido: Variants = {
+  oculto: { opacity: 0, y: -2, transition: transicionRapida },
+  visible: { opacity: 1, y: 0, transition: transicionRapida },
+};
+
 /** Cambio de contenido dentro del botón de envío (etiqueta → spinner → check). */
 export const variantesEtiquetaBoton: Variants = {
   entra: { opacity: 0, y: 6 },

@@ -15,7 +15,7 @@ const MENSAJE_RED =
  */
 export async function enviarRegistro(
   formato: string,
-  registro: Record<string, string>,
+  registro: Record<string, string | number>,
 ): Promise<void> {
   let respuesta: Response;
 

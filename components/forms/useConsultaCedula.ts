@@ -54,8 +54,11 @@ export function useConsultaCedula({ onEncontrado }: Opciones) {
 
       if (resultado.estado === "no-encontrado") {
         setEstado("no-encontrado");
+        // No se afirma que la persona no esté matriculada: el servicio también
+        // responde así cuando el periodo consultado no es el suyo o cuando su
+        // consulta falla. Lo único cierto es que no llegaron datos.
         setMensaje(
-          "El documento no está registrado en Smart Campus. Diligencie los datos manualmente.",
+          "Smart Campus no devolvió datos para este documento. Diligéncielos manualmente.",
         );
         return;
       }

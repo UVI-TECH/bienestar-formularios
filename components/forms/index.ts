@@ -1,4 +1,8 @@
 export { default as FormularioBase } from "./FormularioBase";
+export { default as FormularioAtencion } from "./FormularioAtencion";
+export { default as ResumenRegistro } from "./ResumenRegistro";
+export { default as AvisoConsulta } from "./AvisoConsulta";
+export { RESALTADO_MS, sinErrores } from "./utilidades";
 export { default as SeccionFormulario } from "./SeccionFormulario";
 export { default as RejillaCampos } from "./RejillaCampos";
 export { default as CampoCondicional } from "./CampoCondicional";

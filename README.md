@@ -17,14 +17,19 @@ app/
   layout.tsx                 Fuentes, metadatos, encabezado y pie institucionales
   page.tsx                   Índice con las tarjetas hacia los cuatro formularios
   globals.css                SISTEMA DE DISEÑO: todos los tokens visuales
-  enfermeria/page.tsx        Formulario Asistencia a Enfermería (BH-F-013)
+  enfermeria/page.tsx        Asistencia a Enfermería (BH-F-013)
+  consulta-medica/page.tsx   Consulta Médica (BH-F-020)
+  tamizaje/page.tsx          Tamizaje (BH-F-016), con IMC en vivo
   api/lookup/route.ts        POST · consulta de estudiante por documento
   api/submit/[formato]/      POST · entrega del registro a Power Automate
 components/
   forms/
     FormularioBase.tsx       Envoltura: encabezado, estado de envío, confirmación
+    FormularioAtencion.tsx   Estructura común de Enfermería y Consulta Médica
     BloqueIdentificacion.tsx Identificación + consulta a Smart Campus + bloqueo
     useConsultaCedula.ts     Máquina de estados de la consulta
+    AvisoConsulta.tsx        Franja con el resultado de la consulta
+    ResumenRegistro.tsx      Lista de datos de la pantalla de confirmación
     SeccionFormulario.tsx    Agrupación de campos (fieldset + legend)
     RejillaCampos.tsx        Rejilla estándar de 2 o 3 columnas
     CampoContenedor.tsx      Etiqueta + control + mensaje (base de los campos)
@@ -39,7 +44,9 @@ components/
     index.ts                 Barril de exportaciones
   ui/                        Encabezado, pie, código de formato, girador, checks
 lib/
-  catalogos.ts               SEDES, TIPOS_PERSONA, SEXO, SEMESTRES, PROGRAMAS, ENFERMERAS
+  catalogos.ts               SEDES, TIPOS_PERSONA, SEXO, SEMESTRES, PROGRAMAS,
+                             ENFERMERAS, PROFESIONALES
+  antropometria.ts           Cálculo y clasificación del IMC
   types.ts                   Tipos base de los formularios
   formatos.ts                Código (o sello), título y ruta de cada formato
   identificacion.ts          DatosIdentificacion e IDENTIFICACION_VACIA
@@ -54,8 +61,12 @@ lib/
   cn.ts
 ```
 
-`/enfermeria` está implementado. Faltan `/consulta-medica`, `/tamizaje` y
-`/poliza`; los tres heredan el sistema de diseño, `FormularioBase` y los campos.
+`/enfermeria`, `/consulta-medica` y `/tamizaje` están implementados. Falta
+`/poliza`, que hereda el sistema de diseño, `FormularioBase` y los campos.
+
+Enfermería y Consulta Médica comparten toda su estructura, así que ambas páginas
+son un envoltorio de `FormularioAtencion`: sólo cambian el formato, la ruta de
+envío y quién atiende. Tamizaje tiene su propio conjunto de campos.
 
 ## Sistema de diseño
 
@@ -199,8 +210,48 @@ ni su valor ni el cuerpo de error del flujo se reflejan en la respuesta.
 Con `SUBMIT_MOCK=true` nada sale a la red: el registro se escribe en la consola
 del servidor y se responde éxito tras 500 ms.
 
+### Columnas por formato
+
+Los campos que no aplican al tipo de persona van **vacíos, no ausentes**, para
+que la tabla conserve siempre las mismas columnas.
+
+`enfermeria` y `consulta-medica` — idénticos salvo la última clave:
+
+```
+fecha · hora · sede · tipo_persona · cedula · nombres · apellidos ·
+programa · semestre · dependencia · motivo · procedimiento ·
+enfermera (o profesional) · registrado_en
+```
+
+`tamizaje` — `edad`, `peso_kg`, `talla_cm`, `imc` y `glicemia` viajan como
+números, no como texto, para que Excel pueda promediarlos:
+
+```
+fecha · sede · tipo_persona · cedula · nombres · apellidos · programa ·
+edad · peso_kg · talla_cm · imc · clasificacion_imc · tension_arterial ·
+glicemia · auxiliar · registrado_en
+```
+
+### Índice de masa corporal
+
+`lib/antropometria.ts` calcula IMC = peso / talla², redondeado a un decimal, y
+lo clasifica con los rangos de la OMS (bajo peso, peso normal, sobrepeso,
+obesidad). Se recalcula en cada tecla y se envía ya calculado, junto con la
+clasificación, para que la fila pueda leerse sin repetir la cuenta.
+
+El valor es informativo: se presenta como lectura, en texto neutro y sin
+semáforos, porque acompaña la medición y no la diagnostica.
+
 ## Pendientes conocidos
 
+- **`PROFESIONALES` está vacío en `lib/catalogos.ts`, así que `/consulta-medica`
+  no se puede enviar todavía**: el campo "Médico/profesional que atiende" es
+  obligatorio y aparece deshabilitado con el texto "Catálogo sin configurar".
+  El formulario queda operativo apenas se pueble la lista.
+- **La tensión arterial admite dos cifras de diastólica** (`###/##`, como se
+  especificó), de modo que no se puede registrar 120/100. Si en la práctica se
+  presentan diastólicas de tres cifras, hay que ampliar la máscara y la
+  validación en `lib/validacion.ts`.
 - **Accidente por Póliza Estudiantil** es un instrumento nuevo y todavía no
   tiene código en Isolución. En `lib/formatos.ts` lleva `sello` en lugar de
   `codigo`/`version`, y se muestra con borde punteado. Cuando Calidad le asigne

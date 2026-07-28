@@ -66,3 +66,6 @@ export const ENFERMERAS: readonly string[] = [
   "DIANA LUCÍA GÓMEZ GÁLVEZ",
   "ANYELINE COLMENARES",
 ];
+
+/** PENDIENTE: cargar los médicos y demás profesionales que atienden consulta. */
+export const PROFESIONALES: readonly string[] = [];
