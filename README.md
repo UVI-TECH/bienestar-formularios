@@ -223,14 +223,19 @@ programa · semestre · dependencia · motivo · procedimiento ·
 enfermera (o profesional) · registrado_en
 ```
 
-`tamizaje` — `edad`, `peso_kg`, `talla_cm`, `imc` y `glicemia` viajan como
-números, no como texto, para que Excel pueda promediarlos:
+`tamizaje` — `edad`, `peso`, `talla`, `imc` y `glicemia` viajan como números,
+no como texto, para que Excel pueda promediarlos. `peso` va en kilogramos y
+`talla` en centímetros:
 
 ```
 fecha · sede · tipo_persona · cedula · nombres · apellidos · programa ·
-edad · peso_kg · talla_cm · imc · clasificacion_imc · tension_arterial ·
+edad · peso · talla · imc · clasificacion_imc · tension_arterial ·
 glicemia · auxiliar · registrado_en
 ```
+
+La tensión arterial se captura con máscara `###/###` y se valida por rangos:
+sistólica 60–250 mmHg, diastólica 30–150 mmHg y sistólica mayor que la
+diastólica.
 
 ### Índice de masa corporal
 
@@ -244,14 +249,6 @@ semáforos, porque acompaña la medición y no la diagnostica.
 
 ## Pendientes conocidos
 
-- **`PROFESIONALES` está vacío en `lib/catalogos.ts`, así que `/consulta-medica`
-  no se puede enviar todavía**: el campo "Médico/profesional que atiende" es
-  obligatorio y aparece deshabilitado con el texto "Catálogo sin configurar".
-  El formulario queda operativo apenas se pueble la lista.
-- **La tensión arterial admite dos cifras de diastólica** (`###/##`, como se
-  especificó), de modo que no se puede registrar 120/100. Si en la práctica se
-  presentan diastólicas de tres cifras, hay que ampliar la máscara y la
-  validación en `lib/validacion.ts`.
 - **Accidente por Póliza Estudiantil** es un instrumento nuevo y todavía no
   tiene código en Isolución. En `lib/formatos.ts` lleva `sello` en lugar de
   `codigo`/`version`, y se muestra con borde punteado. Cuando Calidad le asigne

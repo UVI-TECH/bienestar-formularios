@@ -68,4 +68,6 @@ export const ENFERMERAS: readonly string[] = [
 ];
 
 /** PENDIENTE: cargar los médicos y demás profesionales que atienden consulta. */
-export const PROFESIONALES: readonly string[] = [];
+export const PROFESIONALES: readonly string[] = [
+  "CIELO ESPERANZA ESCOBAR MAYA",
+];

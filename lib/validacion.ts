@@ -102,38 +102,62 @@ export function validarRango(
   return undefined;
 }
 
+/** Rangos plausibles de tensión arterial, en mmHg. */
+export const TENSION_SISTOLICA = { minimo: 60, maximo: 250 } as const;
+export const TENSION_DIASTOLICA = { minimo: 30, maximo: 150 } as const;
+
 /**
- * Máscara de tensión arterial: dígitos y una sola barra, hasta 3 cifras de
- * sistólica y 2 de diastólica.
+ * Máscara de tensión arterial: dígitos y una sola barra, hasta 3 cifras a cada
+ * lado (`###/###`), para admitir diastólicas de tres dígitos como 120/100.
  *
  * Si quien registra escribe la barra, se respeta dónde la puso, de modo que
  * `90/60` se captura tal cual. Si no la escribe, se inserta después del tercer
  * dígito, que es el caso corriente (`12080` → `120/80`). Una sistólica de dos
  * cifras escrita de corrido queda mal partida (`9060` → `906/0`), pero se ve
- * en pantalla y se corrige tecleando la barra; es preferible a descartar
- * dígitos en silencio.
+ * en pantalla, la validación la rechaza y se corrige tecleando la barra; es
+ * preferible a descartar dígitos en silencio.
  */
 export function normalizarTension(valor: string): string {
   const limpio = valor.replace(/[^\d/]/g, "");
   const barra = limpio.indexOf("/");
 
   if (barra === -1) {
-    const digitos = limpio.slice(0, 5);
+    const digitos = limpio.slice(0, 6);
     return digitos.length <= 3
       ? digitos
       : `${digitos.slice(0, 3)}/${digitos.slice(3)}`;
   }
 
   const sistolica = limpio.slice(0, barra).slice(0, 3);
-  const diastolica = limpio.slice(barra + 1).replace(/\//g, "").slice(0, 2);
+  const diastolica = limpio.slice(barra + 1).replace(/\//g, "").slice(0, 3);
   return `${sistolica}/${diastolica}`;
 }
 
 export function validarTension(valor: string): string | undefined {
   if (!valor.trim()) return "Ingrese la tensión arterial.";
-  return /^\d{2,3}\/\d{2}$/.test(valor)
-    ? undefined
-    : "Use el formato sistólica/diastólica, por ejemplo 120/80.";
+
+  const partes = /^(\d{2,3})\/(\d{2,3})$/.exec(valor);
+  if (!partes) return "Use el formato sistólica/diastólica, por ejemplo 120/80.";
+
+  const sistolica = Number(partes[1]);
+  const diastolica = Number(partes[2]);
+
+  if (sistolica < TENSION_SISTOLICA.minimo || sistolica > TENSION_SISTOLICA.maximo) {
+    return `La sistólica debe estar entre ${TENSION_SISTOLICA.minimo} y ${TENSION_SISTOLICA.maximo} mmHg.`;
+  }
+  if (
+    diastolica < TENSION_DIASTOLICA.minimo ||
+    diastolica > TENSION_DIASTOLICA.maximo
+  ) {
+    return `La diastólica debe estar entre ${TENSION_DIASTOLICA.minimo} y ${TENSION_DIASTOLICA.maximo} mmHg.`;
+  }
+  // Una sistólica menor o igual que la diastólica indica que las cifras se
+  // invirtieron o que la barra quedó mal ubicada.
+  if (sistolica <= diastolica) {
+    return "La sistólica debe ser mayor que la diastólica.";
+  }
+
+  return undefined;
 }
 
 /** Descarta las entradas `undefined` para obtener sólo los errores reales. */

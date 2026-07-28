@@ -192,8 +192,10 @@ export default function Tamizaje() {
       apellidos: datos.apellidos,
       programa: esEstudiante ? datos.programa : "",
       edad: Number(datos.edad),
-      peso_kg: Number(datos.peso),
-      talla_cm: Number(datos.talla),
+      // `peso` en kilogramos y `talla` en centímetros: así se llaman las
+      // columnas de la tabla de Excel y del esquema del flujo.
+      peso: Number(datos.peso),
+      talla: Number(datos.talla),
       imc: imc ?? "",
       clasificacion_imc: clasificacion,
       tension_arterial: datos.tension,
@@ -410,7 +412,7 @@ export default function Tamizaje() {
             onChange={(v) => actualizar("tension", normalizarTension(v))}
             inputMode="numeric"
             marcador="120/80"
-            ayuda="Sistólica/diastólica, por ejemplo 120/80."
+            ayuda="Sistólica/diastólica en mmHg, por ejemplo 120/80."
             error={errores.tension}
             requerido
           />
