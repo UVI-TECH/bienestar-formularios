@@ -249,12 +249,12 @@ convierta a notación científica; `area_protegida` y `ambulancia` van como
 `"Sí"`/`"No"`, que se lee mejor que un booleano en los informes:
 
 ```
-caso_id · fecha_accidente · hora_accidente · sede · lugar · hora_ingreso ·
-cedula · nombres · apellidos · sexo · programa · semestre ·
+caso_id · fecha_accidente · hora_accidente · sede · lugar_accidente ·
+hora_ingreso · cedula · nombres · apellidos · sexo · programa · semestre ·
 telefono_estudiante · telefono_familiar · enfermera · atencion_inicial ·
 area_protegida · hora_llamada · medico_area_protegida · ambulancia ·
-tipo_remision · centro_medico · diagnostico · hora_egreso · acompanante ·
-observaciones · estado · registrado_en
+tipo_remision · centro_medico · diagnostico_presuntivo · hora_egreso ·
+acompanante · observaciones · estado · registrado_en
 ```
 
 ### Radicado del caso (`caso_id`)

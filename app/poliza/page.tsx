@@ -251,7 +251,7 @@ export default function AtencionPorAccidente() {
       fecha_accidente: datos.fechaAccidente,
       hora_accidente: datos.horaAccidente,
       sede: datos.sede,
-      lugar: datos.lugar,
+      lugar_accidente: datos.lugar,
       hora_ingreso: datos.horaIngreso,
 
       cedula: datos.cedula,
@@ -272,7 +272,7 @@ export default function AtencionPorAccidente() {
       ambulancia: llamoAreaProtegida ? datos.ambulancia : "",
       tipo_remision: datos.tipoRemision,
       centro_medico: huboRemision ? datos.centroMedico : "",
-      diagnostico: datos.diagnostico,
+      diagnostico_presuntivo: datos.diagnostico,
       hora_egreso: datos.horaEgreso,
       acompanante: datos.acompanante,
       observaciones: datos.observaciones,
