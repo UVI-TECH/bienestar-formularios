@@ -67,6 +67,17 @@ export const ENFERMERAS: readonly string[] = [
   "ANYELINE COLMENARES",
 ];
 
+/** Destino al que se remite al estudiante tras un accidente. */
+export const TIPOS_REMISION = [
+  "Póliza estudiantil",
+  "Área protegida",
+  "EPS",
+  "No requirió remisión",
+] as const;
+
+/** Cómo queda el caso al cerrar el registro de accidente. */
+export const ESTADOS_CASO = ["Cerrado", "En seguimiento"] as const;
+
 /** PENDIENTE: cargar los médicos y demás profesionales que atienden consulta. */
 export const PROFESIONALES: readonly string[] = [
   "CIELO ESPERANZA ESCOBAR MAYA",

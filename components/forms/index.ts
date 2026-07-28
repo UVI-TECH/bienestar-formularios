@@ -10,6 +10,7 @@ export { default as BotonEnviar } from "./BotonEnviar";
 
 export { default as CampoTexto } from "./CampoTexto";
 export { default as CampoSelect } from "./CampoSelect";
+export { default as CampoRadio } from "./CampoRadio";
 export { default as CampoFecha } from "./CampoFecha";
 export { default as CampoHora } from "./CampoHora";
 export { default as CampoTextarea } from "./CampoTextarea";

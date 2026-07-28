@@ -20,6 +20,7 @@ app/
   enfermeria/page.tsx        Asistencia a Enfermería (BH-F-013)
   consulta-medica/page.tsx   Consulta Médica (BH-F-020)
   tamizaje/page.tsx          Tamizaje (BH-F-016), con IMC en vivo
+  poliza/page.tsx            Atención por Accidente — Póliza Estudiantil
   api/lookup/route.ts        POST · consulta de estudiante por documento
   api/submit/[formato]/      POST · entrega del registro a Power Automate
 components/
@@ -35,6 +36,7 @@ components/
     CampoContenedor.tsx      Etiqueta + control + mensaje (base de los campos)
     CampoTexto.tsx
     CampoSelect.tsx          Siempre con opción vacía "Seleccione…"
+    CampoRadio.tsx           Opciones excluyentes a la vista (Sí/No, estado)
     CampoFecha.tsx           Por defecto, hoy
     CampoHora.tsx            Por defecto, ahora
     CampoTextarea.tsx
@@ -61,12 +63,16 @@ lib/
   cn.ts
 ```
 
-`/enfermeria`, `/consulta-medica` y `/tamizaje` están implementados. Falta
-`/poliza`, que hereda el sistema de diseño, `FormularioBase` y los campos.
+Los cuatro formularios están implementados.
 
 Enfermería y Consulta Médica comparten toda su estructura, así que ambas páginas
 son un envoltorio de `FormularioAtencion`: sólo cambian el formato, la ruta de
-envío y quién atiende. Tamizaje tiene su propio conjunto de campos.
+envío y quién atiende. Tamizaje y Póliza tienen sus propios campos.
+
+Póliza es el formulario más largo, y por eso sus cuatro secciones llevan marca
+de paso (A–D) y separación amplia: se recorre de corrido, sin partirlo en
+páginas, para que se pueda volver atrás con la vista. La sección D va en panel
+destacado porque es la que decide si el caso queda abierto.
 
 ## Sistema de diseño
 
@@ -236,6 +242,32 @@ glicemia · auxiliar · registrado_en
 La tensión arterial se captura con máscara `###/###` y se valida por rangos:
 sistólica 60–250 mmHg, diastólica 30–150 mmHg y sistólica mayor que la
 diastólica.
+
+`poliza` — el servidor agrega `caso_id`, además de `registrado_en`. Los
+teléfonos van como **texto**, para no perder el cero inicial ni que Excel los
+convierta a notación científica; `area_protegida` y `ambulancia` van como
+`"Sí"`/`"No"`, que se lee mejor que un booleano en los informes:
+
+```
+caso_id · fecha_accidente · hora_accidente · sede · lugar · hora_ingreso ·
+cedula · nombres · apellidos · sexo · programa · semestre ·
+telefono_estudiante · telefono_familiar · enfermera · atencion_inicial ·
+area_protegida · hora_llamada · medico_area_protegida · ambulancia ·
+tipo_remision · centro_medico · diagnostico · hora_egreso · acompanante ·
+observaciones · estado · registrado_en
+```
+
+### Radicado del caso (`caso_id`)
+
+Sólo en póliza. Lo genera el servidor con el formato `AP-{AAAA}-{4 dígitos}`
+(p. ej. `AP-2026-0482`), tomando el año en hora de Colombia, y se devuelve al
+navegador para mostrarlo en la confirmación.
+
+> Los cuatro dígitos son aleatorios, así que **no está garantizado que el número
+> sea único**: con unos cientos de casos al año la probabilidad de repetir uno
+> es apreciable. Sirve como referencia legible para hablar del caso; la fila de
+> Excel sigue siendo el registro autoritativo. Si hace falta unicidad, hay que
+> llevar un consecutivo en el flujo o en la tabla.
 
 ### Índice de masa corporal
 

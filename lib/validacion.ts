@@ -49,6 +49,22 @@ export function validarTelefono(valor: string): string | undefined {
     : "Ingrese un teléfono de 7 a 10 dígitos.";
 }
 
+/** Deja sólo dígitos y recorta a diez. Para usar en `onChange`. */
+export function normalizarCelular(valor: string): string {
+  return valor.replace(/\D/g, "").slice(0, 10);
+}
+
+/** Celular colombiano: exactamente diez dígitos. */
+export function validarCelular(
+  valor: string,
+  campo = "el teléfono",
+): string | undefined {
+  if (!valor.trim()) return `Ingrese ${campo}.`;
+  return /^\d{10}$/.test(valor)
+    ? undefined
+    : `${campo[0].toUpperCase()}${campo.slice(1)} debe tener diez dígitos.`;
+}
+
 export function validarEdad(valor: string): string | undefined {
   if (!valor) return undefined;
   const edad = Number(valor);

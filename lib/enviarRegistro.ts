@@ -9,14 +9,21 @@ const MENSAJES: Record<number, string> = {
 const MENSAJE_RED =
   "No hay conexión con el servidor. Verifique la red e intente de nuevo.";
 
+export interface ResultadoEnvio {
+  ok: boolean;
+  /** Radicado del accidente, sólo en póliza. Lo genera el servidor. */
+  caso_id?: string;
+}
+
 /**
- * Entrega el registro. Lanza un `Error` con un mensaje presentable si falla,
- * que es lo que `FormularioBase` espera para mostrarlo en la barra de acciones.
+ * Entrega el registro y devuelve lo que el servidor haya generado. Lanza un
+ * `Error` con un mensaje presentable si falla, que es lo que `FormularioBase`
+ * espera para mostrarlo en la barra de acciones.
  */
 export async function enviarRegistro(
   formato: string,
   registro: Record<string, string | number>,
-): Promise<void> {
+): Promise<ResultadoEnvio> {
   let respuesta: Response;
 
   try {
@@ -31,5 +38,12 @@ export async function enviarRegistro(
 
   if (!respuesta.ok) {
     throw new Error(MENSAJES[respuesta.status] ?? MENSAJE_RED);
+  }
+
+  try {
+    return (await respuesta.json()) as ResultadoEnvio;
+  } catch {
+    // El registro se entregó; sólo no pudimos leer lo que devolvió.
+    return { ok: true };
   }
 }

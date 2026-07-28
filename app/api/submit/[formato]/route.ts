@@ -1,6 +1,6 @@
 import {
+  camposDelServidor,
   esFormatoEnviable,
-  marcaDeTiempo,
   sanearRegistro,
   variableDeFlujo,
 } from "@/lib/envio";
@@ -29,8 +29,15 @@ import {
 const TIEMPO_LIMITE_MS = 15_000;
 const LATENCIA_SIMULADA_MS = 500;
 
-function responder(ok: boolean, estado = 200): Response {
-  return Response.json({ ok }, { status: estado, headers: { "Cache-Control": "no-store" } });
+function responder(
+  ok: boolean,
+  estado = 200,
+  extra?: Record<string, string>,
+): Response {
+  return Response.json(
+    { ok, ...extra },
+    { status: estado, headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(
@@ -51,13 +58,17 @@ export async function POST(
   const registro = sanearRegistro(cuerpo);
   if (Object.keys(registro).length === 0) return responder(false, 400);
 
-  const fila = { ...registro, registrado_en: marcaDeTiempo() };
+  // El servidor agrega la marca de tiempo y, en póliza, el radicado del caso.
+  // Se devuelven al cliente para que la confirmación pueda mostrarlos.
+  const generados = camposDelServidor(formato);
+  const fila = { ...registro, ...generados };
+  const devueltos = generados.caso_id ? { caso_id: generados.caso_id } : undefined;
 
   // Modo simulado: nada sale a la red, el registro queda en la consola.
   if (process.env.SUBMIT_MOCK === "true") {
     console.log(`[submit:${formato}] (simulado)`, JSON.stringify(fila, null, 2));
     await new Promise((resolver) => setTimeout(resolver, LATENCIA_SIMULADA_MS));
-    return responder(true);
+    return responder(true, 200, devueltos);
   }
 
   const variable = variableDeFlujo(formato);
@@ -89,7 +100,7 @@ export async function POST(
       return responder(false, 502);
     }
 
-    return responder(true);
+    return responder(true, 200, devueltos);
   } catch (causa) {
     console.error(
       `[submit:${formato}] no fue posible entregar el registro:`,

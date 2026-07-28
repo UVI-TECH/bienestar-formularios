@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import CheckAnimado from "@/components/ui/CheckAnimado";
 import CodigoFormato from "@/components/ui/CodigoFormato";
+import { cn } from "@/lib/cn";
 import { variantesError, variantesPanel } from "@/lib/motion";
 import type { ErroresFormulario, EstadoEnvio, Formato } from "@/lib/types";
 import BotonEnviar from "./BotonEnviar";
@@ -36,6 +37,11 @@ interface Props {
   resumenExito?: ReactNode;
   mensajeExito?: string;
   etiquetaEnviar?: string;
+  /**
+   * `amplio` separa más las secciones. En un formulario largo, el aire entre
+   * tramos es lo que evita que se lea como un muro de campos.
+   */
+  espaciado?: "normal" | "amplio";
 }
 
 /**
@@ -55,6 +61,7 @@ export default function FormularioBase({
   resumenExito,
   mensajeExito = "El registro quedó guardado correctamente.",
   etiquetaEnviar,
+  espaciado = "normal",
 }: Props) {
   const [estado, setEstado] = useState<EstadoEnvio>("inactivo");
   const [mensajeError, setMensajeError] = useState("");
@@ -186,7 +193,14 @@ export default function FormularioBase({
               animate="visible"
               exit="sale"
             >
-              <div className="space-y-8 px-6 py-7 sm:px-8">{children}</div>
+              <div
+                className={cn(
+                  "px-6 py-7 sm:px-8",
+                  espaciado === "amplio" ? "space-y-12" : "space-y-8",
+                )}
+              >
+                {children}
+              </div>
 
               <div className="flex flex-wrap items-center justify-end gap-4 border-t border-borde bg-superficie-tenue px-6 py-5 sm:px-8">
                 <AnimatePresence initial={false}>

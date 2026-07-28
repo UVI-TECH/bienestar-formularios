@@ -30,6 +30,7 @@ export default function CampoContenedor({
   return (
     <div className={cn("flex min-w-0 flex-col gap-1.5", className)}>
       <label
+        id={`${name}-etiqueta`}
         htmlFor={asociarEtiqueta ? name : undefined}
         className="text-etiqueta font-medium text-texto-medio"
       >

@@ -258,6 +258,49 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error-600) 16%, transparent);
   }
 
+  /* Opción de un grupo de radio. El control es nativo —teñido con el color
+     institucional— y la caja que lo envuelve amplía el área de toque, que en
+     tablet importa más que el adorno. */
+  .opcion-radio {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: var(--alto-control);
+    padding: 0 1rem;
+    border-radius: var(--radius-campo);
+    border: 1px solid var(--color-borde-fuerte);
+    background-color: var(--color-superficie);
+    font-size: var(--text-campo);
+    color: var(--color-texto);
+    cursor: pointer;
+    transition-property: background-color, border-color;
+    transition-duration: var(--dur-rapida);
+    transition-timing-function: var(--ease-salida);
+  }
+
+  .opcion-radio input[type="radio"] {
+    accent-color: var(--color-inst-700);
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+  }
+
+  .opcion-radio:hover {
+    border-color: var(--color-neutro-400);
+  }
+
+  .opcion-radio:has(input:checked) {
+    border-color: var(--color-inst-600);
+    background-color: var(--color-inst-50);
+    font-weight: 500;
+  }
+
+  /* El foco se dibuja sobre la caja, no sobre el control diminuto. */
+  .opcion-radio:has(input:focus-visible) {
+    outline: 2px solid var(--color-inst-600);
+    outline-offset: 2px;
+  }
+
   /* Botón sólido institucional. */
   .boton-primario {
     display: inline-flex;

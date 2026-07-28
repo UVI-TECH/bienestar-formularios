@@ -1,5 +1,8 @@
 import "server-only";
 
+import { randomInt } from "node:crypto";
+import { fechaHoy } from "./fechas";
+
 /**
  * Preparación del registro que se envía al flujo de Power Automate.
  * Sólo se usa desde `app/api/submit/[formato]/route.ts`.
@@ -73,4 +76,37 @@ export function sanearRegistro(cuerpo: unknown): Record<string, ValorRegistro> {
 /** Marca de tiempo del registro. La pone el servidor: el reloj del cliente no es fiable. */
 export function marcaDeTiempo(): string {
   return new Date().toISOString();
+}
+
+/* ---------------------------------------------------------------------------
+   Identificador de caso (sólo póliza)
+   --------------------------------------------------------------------------- */
+
+/**
+ * Radicado del accidente, con el formato `AP-{AAAA}-{4 dígitos}`.
+ *
+ * Lo genera el servidor para que el número no dependa del reloj ni del
+ * navegador de quien registra. El año se toma en hora de Colombia, no en UTC,
+ * para que un registro de la noche del 31 de diciembre no quede con el año
+ * siguiente.
+ *
+ * NOTA: son cuatro dígitos aleatorios, así que **no está garantizado que sea
+ * único**: con unos cientos de casos al año la probabilidad de repetir uno es
+ * apreciable. Sirve como referencia legible para hablar del caso; la fila de
+ * Excel sigue siendo el registro autoritativo. Si más adelante se necesita
+ * unicidad, hay que llevar un consecutivo en el flujo o en la tabla.
+ */
+export function generarCasoId(): string {
+  const anio = fechaHoy().slice(0, 4);
+  const aleatorio = randomInt(0, 10_000).toString().padStart(4, "0");
+  return `AP-${anio}-${aleatorio}`;
+}
+
+/** Campos que agrega el servidor según el formato. */
+export function camposDelServidor(
+  formato: FormatoEnviable,
+): Record<string, string> {
+  const generados: Record<string, string> = { registrado_en: marcaDeTiempo() };
+  if (formato === "poliza") generados.caso_id = generarCasoId();
+  return generados;
 }
