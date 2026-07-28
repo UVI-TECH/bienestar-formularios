@@ -1,6 +1,5 @@
 import "server-only";
 
-import { randomInt } from "node:crypto";
 import { fechaHoy } from "./fechas";
 
 /**
@@ -82,24 +81,40 @@ export function marcaDeTiempo(): string {
    Identificador de caso (sólo póliza)
    --------------------------------------------------------------------------- */
 
+const LONGITUD_SUFIJO = 6;
+
 /**
- * Radicado del accidente, con el formato `AP-{AAAA}-{4 dígitos}`.
- *
- * Lo genera el servidor para que el número no dependa del reloj ni del
- * navegador de quien registra. El año se toma en hora de Colombia, no en UTC,
- * para que un registro de la noche del 31 de diciembre no quede con el año
- * siguiente.
- *
- * NOTA: son cuatro dígitos aleatorios, así que **no está garantizado que sea
- * único**: con unos cientos de casos al año la probabilidad de repetir uno es
- * apreciable. Sirve como referencia legible para hablar del caso; la fila de
- * Excel sigue siendo el registro autoritativo. Si más adelante se necesita
- * unicidad, hay que llevar un consecutivo en el flujo o en la tabla.
+ * Milisegundos que abarcan seis caracteres en base 36: 36⁶ = 2 176 782 336,
+ * algo más de 25 días. Pasado ese lapso el sufijo vuelve a empezar.
  */
-export function generarCasoId(): string {
+const CICLO_MS = 36 ** LONGITUD_SUFIJO;
+
+/**
+ * Radicado del accidente, con el formato `AP-{AAAA}-{6 caracteres base 36}`
+ * — por ejemplo `AP-2026-1KP4ZC`.
+ *
+ * Es la llave que une la atención con sus seguimientos y nombra la carpeta de
+ * soportes, así que la prioridad es que no se repita. El sufijo son los
+ * milisegundos del reloj en base 36: dos registros sólo coinciden si el
+ * servidor los sella **en el mismo milisegundo**, o si están separados por un
+ * múltiplo exacto de 25,2 días al milisegundo (≈ 1 en 2 176 millones). Frente a
+ * un número aleatorio de la misma longitud es bastante mejor: los registros
+ * reales están separados por segundos o minutos, no por azar.
+ *
+ * De paso, el sufijo crece con el tiempo, así que dentro de una misma ventana
+ * de 25 días los radicados quedan en orden cronológico.
+ *
+ * Lo genera el servidor para que no dependa del reloj ni del navegador de quien
+ * registra. El año se toma en hora de Colombia, no en UTC, para que un registro
+ * de la noche del 31 de diciembre no quede con el año siguiente.
+ */
+export function generarCasoId(referencia: number = Date.now()): string {
   const anio = fechaHoy().slice(0, 4);
-  const aleatorio = randomInt(0, 10_000).toString().padStart(4, "0");
-  return `AP-${anio}-${aleatorio}`;
+  const sufijo = (referencia % CICLO_MS)
+    .toString(36)
+    .padStart(LONGITUD_SUFIJO, "0")
+    .toUpperCase();
+  return `AP-${anio}-${sufijo}`;
 }
 
 /** Campos que agrega el servidor según el formato. */

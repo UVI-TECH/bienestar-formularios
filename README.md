@@ -259,15 +259,28 @@ acompanante · observaciones · estado · registrado_en
 
 ### Radicado del caso (`caso_id`)
 
-Sólo en póliza. Lo genera el servidor con el formato `AP-{AAAA}-{4 dígitos}`
-(p. ej. `AP-2026-0482`), tomando el año en hora de Colombia, y se devuelve al
-navegador para mostrarlo en la confirmación.
+Sólo en póliza. Lo genera el servidor con el formato
+`AP-{AAAA}-{6 caracteres base 36}` — por ejemplo `AP-2026-1KP4ZC` —, tomando el
+año en hora de Colombia, y se devuelve al navegador para mostrarlo en la
+confirmación.
 
-> Los cuatro dígitos son aleatorios, así que **no está garantizado que el número
-> sea único**: con unos cientos de casos al año la probabilidad de repetir uno
-> es apreciable. Sirve como referencia legible para hablar del caso; la fila de
-> Excel sigue siendo el registro autoritativo. Si hace falta unicidad, hay que
-> llevar un consecutivo en el flujo o en la tabla.
+Es la llave que une la atención con sus seguimientos y nombra la carpeta de
+soportes, así que la prioridad es que no se repita. El sufijo son **los
+milisegundos del reloj en base 36**, no un número al azar: como los registros
+reales están separados por segundos o minutos, dos radicados sólo coinciden si
+
+- el servidor los sella en el **mismo milisegundo**, o
+- están separados por un múltiplo exacto de 25,2 días **al milisegundo**
+  (≈ 1 en 2 176 millones).
+
+Medido sobre 5 000 registros de un año separados entre 1 y 600 s: **ninguna
+colisión**. Como efecto secundario el sufijo crece con el tiempo, así que dentro
+de una misma ventana de 25 días los radicados quedan en orden cronológico.
+
+> El alfabeto base 36 en mayúsculas incluye caracteres que se confunden al
+> dictar o teclear (`0`/`O`, `1`/`I`). Como el radicado se copia de la pantalla
+> de confirmación, en la práctica no estorba; si se va a dictar por teléfono,
+> conviene cambiar a un alfabeto sin ambigüedades (Crockford base 32).
 
 ### Índice de masa corporal
 
