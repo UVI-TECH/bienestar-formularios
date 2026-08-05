@@ -7,7 +7,7 @@ import CampoContenedor, { atributosControl } from "./CampoContenedor";
 interface Props extends PropsCampoBase {
   valor: string;
   onChange: (valor: string) => void;
-  tipo?: "text" | "email" | "tel" | "number";
+  tipo?: "text" | "email" | "tel" | "number" | "password";
   /** Sugerencia dentro del control. Nunca reemplaza a la etiqueta. */
   marcador?: string;
   maxLength?: number;
