@@ -87,6 +87,20 @@ export const TIPOS_REMISION = [
 /** Cómo queda el caso al cerrar el registro de accidente. */
 export const ESTADOS_CASO = ["Cerrado", "En seguimiento"] as const;
 
+/** Naturaleza de una entrada de la línea de tiempo de seguimiento de un caso. */
+export const TIPOS_SEGUIMIENTO = [
+  "Evolución 12-24h",
+  "Procedimiento quirúrgico",
+  "Curación",
+  "Retiro de sutura",
+  "Retiro de material",
+  "Incapacidad / plan ambulatorio",
+  "Terapia / rehabilitación",
+  "Control con especialista",
+  "Contacto con familia",
+  "Otro",
+] as const;
+
 /** PENDIENTE: cargar los médicos y demás profesionales que atienden consulta. */
 export const PROFESIONALES: readonly string[] = [
   "CIELO ESPERANZA ESCOBAR MAYA",
