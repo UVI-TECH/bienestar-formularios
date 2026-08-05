@@ -60,6 +60,15 @@ export const PROGRAMAS: readonly string[] = [
   "Licenciatura en Ciencias del Deporte y la Educación Física",
 ];
 
+/** Facultades académicas de la UNIAJC. */
+export const FACULTADES = [
+  "Facultad de Ingeniería",
+  "Facultad de Ciencias Empresariales",
+  "Facultad de Ciencias Sociales y Humanas",
+  "Facultad de Educación a Distancia y Virtual",
+  "CEFTEL (Centro de Formación Técnica Laboral)",
+] as const;
+
 /** Personal de enfermería del área de salud. */
 export const ENFERMERAS: readonly string[] = [
   "CIELO ESPERANZA ESCOBAR MAYA",

@@ -1,7 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { PROGRAMAS, SEDES, SEMESTRES, TIPOS_PERSONA } from "@/lib/catalogos";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  FACULTADES,
+  PROGRAMAS,
+  SEDES,
+  SEMESTRES,
+  TIPOS_PERSONA,
+} from "@/lib/catalogos";
 import { enviarRegistro } from "@/lib/enviarRegistro";
 import { fechaLegible, horaLegible } from "@/lib/fechas";
 import type { FormatoConRuta } from "@/lib/formatos";
@@ -40,6 +46,13 @@ interface Props {
   /** Segmento de `/api/submit/[formato]`, p. ej. `consulta-medica`. */
   rutaEnvio: string;
   quienAtiende: QuienAtiende;
+  /**
+   * Valor inicial de `quienAtiende`, cuando coincide con la persona en
+   * sesión (ver `nombreDeSesionEnCatalogo`). Preselecciona el campo sin
+   * bloquearlo: sigue siendo un desplegable normal, por si registra alguien
+   * distinto de quien tiene la sesión abierta.
+   */
+  atiendePorDefecto?: string;
 }
 
 interface DatosAtencion {
@@ -51,6 +64,7 @@ interface DatosAtencion {
   nombres: string;
   apellidos: string;
   programa: string;
+  facultad: string;
   semestre: string;
   dependencia: string;
   motivo: string;
@@ -67,6 +81,7 @@ const DATOS_VACIOS: DatosAtencion = {
   nombres: "",
   apellidos: "",
   programa: "",
+  facultad: "",
   semestre: "",
   dependencia: "",
   motivo: "",
@@ -78,8 +93,13 @@ export default function FormularioAtencion({
   formato,
   rutaEnvio,
   quienAtiende,
+  atiendePorDefecto = "",
 }: Props) {
-  const [datos, setDatos] = useState<DatosAtencion>(DATOS_VACIOS);
+  const datosIniciales = useMemo(
+    () => ({ ...DATOS_VACIOS, atiende: atiendePorDefecto }),
+    [atiendePorDefecto],
+  );
+  const [datos, setDatos] = useState<DatosAtencion>(datosIniciales);
   const [errores, setErrores] = useState<ErroresFormulario>({});
   const [resaltado, setResaltado] = useState(false);
   const [resumen, setResumen] = useState<DatosAtencion | null>(null);
@@ -102,11 +122,21 @@ export default function FormularioAtencion({
       ...previo,
       nombres: traidos.nombres ?? "",
       apellidos: traidos.apellidos ?? "",
-      // Smart Campus no devuelve el semestre: ese lo elige quien registra.
       programa: traidos.programa ?? previo.programa,
+      facultad: traidos.facultad ?? previo.facultad,
+      // El semestre se deriva de los grupos y puede no venir; si no llega,
+      // lo elige quien registra.
+      semestre: traidos.semestre ?? previo.semestre,
     }));
     setErrores((previos) =>
-      sinErrores(previos, "nombres", "apellidos", "programa"),
+      sinErrores(
+        previos,
+        "nombres",
+        "apellidos",
+        "programa",
+        "facultad",
+        "semestre",
+      ),
     );
 
     if (temporizador.current) clearTimeout(temporizador.current);
@@ -135,6 +165,7 @@ export default function FormularioAtencion({
         nombres: "",
         apellidos: "",
         programa: "",
+        facultad: "",
         semestre: "",
       }));
       return;
@@ -158,6 +189,10 @@ export default function FormularioAtencion({
       programa:
         esEstudiante && !datos.programa
           ? "Seleccione el programa académico."
+          : undefined,
+      facultad:
+        esEstudiante && !datos.facultad
+          ? "Seleccione la facultad."
           : undefined,
       semestre:
         esEstudiante && !datos.semestre ? "Seleccione el semestre." : undefined,
@@ -193,6 +228,7 @@ export default function FormularioAtencion({
       nombres: datos.nombres,
       apellidos: datos.apellidos,
       programa: esEstudiante ? datos.programa : "",
+      facultad: esEstudiante ? datos.facultad : "",
       semestre: esEstudiante ? datos.semestre : "",
       dependencia: esVinculado ? datos.dependencia : "",
       motivo: datos.motivo,
@@ -204,7 +240,7 @@ export default function FormularioAtencion({
   }, [datos, esEstudiante, esVinculado, rutaEnvio, quienAtiende.name]);
 
   function reiniciar() {
-    setDatos(DATOS_VACIOS);
+    setDatos(datosIniciales);
     setErrores({});
     setResumen(null);
     consulta.reiniciar();
@@ -336,6 +372,17 @@ export default function FormularioAtencion({
         <CampoCondicional visible={esEstudiante}>
           <RejillaCampos>
             <CampoSelect
+              name="facultad"
+              etiqueta="Facultad"
+              valor={datos.facultad}
+              onChange={(v) => actualizar("facultad", v)}
+              opciones={FACULTADES}
+              error={errores.facultad}
+              soloLectura={consulta.bloqueado}
+              resaltado={resaltado}
+              requerido
+            />
+            <CampoSelect
               name="programa"
               etiqueta="Programa académico"
               valor={datos.programa}
@@ -353,6 +400,8 @@ export default function FormularioAtencion({
               onChange={(v) => actualizar("semestre", v)}
               opciones={SEMESTRES}
               error={errores.semestre}
+              soloLectura={consulta.bloqueado}
+              resaltado={resaltado}
               requerido
             />
           </RejillaCampos>

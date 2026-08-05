@@ -16,7 +16,7 @@ import { validarCedula } from "@/lib/validacion";
  *
  * Cuerpo:  { cedula: string, tipoPersona?: string }
  * Respuesta (SIEMPRE esta forma, sin excepción):
- *          { encontrado: boolean, nombres?, apellidos?, programa?, semestre? }
+ *          { encontrado: boolean, nombres?, apellidos?, programa?, facultad?, semestre? }
  *
  * Las condiciones de error viajan en el código HTTP, no en el cuerpo:
  *   400  cédula ausente o inválida

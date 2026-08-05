@@ -1,6 +1,6 @@
 import "server-only";
 
-import { PROGRAMAS } from "./catalogos";
+import { FACULTADES, PROGRAMAS, SEMESTRES } from "./catalogos";
 import type { RespuestaConsultaCedula } from "./types";
 
 /**
@@ -77,9 +77,8 @@ function indice(base: number, sal: number, largo: number): number {
 /**
  * Respuesta simulada, para desarrollar sin depender del servicio.
  *
- * Devuelve exactamente los mismos campos que el servicio real —es decir, **sin
- * semestre**, porque Smart Campus no lo entrega— para que el formulario no se
- * comporte distinto al cambiar de modo.
+ * Devuelve los mismos campos que el servicio real, semestre incluido, para
+ * que el formulario no se comporte distinto al cambiar de modo.
  *
  * Convención para poder probar el camino de "no encontrado" sin tocar código:
  * **las cédulas terminadas en 0 se comportan como no registradas**.
@@ -98,6 +97,8 @@ export async function consultarSimulado(
     nombres: NOMBRES[indice(base, 1, NOMBRES.length)],
     apellidos: APELLIDOS[indice(base, 2, APELLIDOS.length)],
     programa: PROGRAMAS_SIMULADOS[indice(base, 3, PROGRAMAS_SIMULADOS.length)],
+    facultad: FACULTADES[indice(base, 4, FACULTADES.length)],
+    semestre: SEMESTRES[indice(base, 5, SEMESTRES.length)],
   };
 }
 
@@ -111,8 +112,9 @@ export class ErrorSmartCampus extends Error {}
  * `Persona`, el objeto que describe al estudiante.
  *
  * Se declara completo para dejar constancia de lo que entrega el servicio,
- * pero de aquí sólo salen tres campos: correos, facultad, código de programa,
- * grupos, unidad docente y usuario no se publican al navegador porque el
+ * pero de aquí sólo se publican nombres, apellidos, programa y facultad, más
+ * el semestre derivado de `grupos` (ver `semestreDeGrupos`). Correos, código
+ * de programa, unidad docente y usuario no se publican al navegador porque el
  * formulario no los necesita.
  */
 interface EstudianteSmartCampus {
@@ -141,6 +143,47 @@ interface SobreSmartCampus {
 
 function limpiar(valor: unknown): string | undefined {
   return typeof valor === "string" && valor.trim() ? valor.trim() : undefined;
+}
+
+/** El semestre máximo que ofrece la institución (el mayor valor de `SEMESTRES`). */
+const SEMESTRE_MAXIMO = SEMESTRES.length;
+
+/**
+ * Extrae el semestre de un código de grupo, p. ej. `841B` → 8, `S144` → 1.
+ *
+ * Regla deducida de los códigos reales: se ignoran las letras iniciales
+ * (`S`, `SB`, …) y se toma el primer dígito de lo que sigue —salvo que
+ * empiece por "10", el único semestre de dos cifras, en cuyo caso es 10—.
+ * Así, `SB1040` da 10 y no 1.
+ */
+function semestreDeCodigo(codigo: string): number | undefined {
+  const digitos = codigo.match(/^[^0-9]*([0-9]+)/)?.[1];
+  if (!digitos) return undefined;
+
+  const semestre = digitos.startsWith("10") ? 10 : Number(digitos[0]);
+  return semestre >= 1 && semestre <= SEMESTRE_MAXIMO ? semestre : undefined;
+}
+
+/**
+ * Un estudiante puede tener varios grupos vigentes a la vez (materias de
+ * semestres distintos matriculadas en el mismo periodo). Se toma el semestre
+ * más alto entre todos los códigos: es el que mejor describe en qué va.
+ */
+function semestreDeGrupos(
+  grupos: EstudianteSmartCampus["grupos"],
+): string | undefined {
+  if (!grupos) return undefined;
+
+  let maximo: number | undefined;
+  for (const grupo of grupos) {
+    if (typeof grupo.codigo !== "string") continue;
+    const semestre = semestreDeCodigo(grupo.codigo);
+    if (semestre !== undefined && (maximo === undefined || semestre > maximo)) {
+      maximo = semestre;
+    }
+  }
+
+  return maximo?.toString();
 }
 
 /**
@@ -176,8 +219,9 @@ function extraerPersona(carga: unknown): EstudianteSmartCampus | undefined {
  * Traduce la respuesta de Smart Campus a nuestra forma pública.
  * Todo lo que no esté en `RespuestaConsultaCedula` se descarta aquí.
  *
- * Nota: el servicio **no devuelve el semestre**, así que ese campo queda para
- * que lo seleccione quien registra.
+ * Nota: el servicio no entrega el semestre como campo propio; se deriva de
+ * `grupos` (ver `semestreDeGrupos`). Si no hay grupos, o ninguno tiene un
+ * código reconocible, queda sin definir y lo completa quien registra.
  */
 export function mapearRespuesta(carga: unknown): RespuestaConsultaCedula {
   const datos = extraerPersona(carga);
@@ -194,6 +238,8 @@ export function mapearRespuesta(carga: unknown): RespuestaConsultaCedula {
     nombres,
     apellidos,
     programa: limpiar(datos.programa),
+    facultad: limpiar(datos.facultad),
+    semestre: semestreDeGrupos(datos.grupos),
   };
 }
 
