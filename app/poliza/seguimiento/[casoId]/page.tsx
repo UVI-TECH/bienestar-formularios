@@ -5,6 +5,7 @@ import { ErrorCasos, leerCasos, leerSeguimientos } from "@/lib/casos";
 import { obtenerSesion } from "@/lib/sesion";
 import CabeceraAtencion from "./CabeceraAtencion";
 import LineaTiempoSeguimientos from "./LineaTiempoSeguimientos";
+import SoportesCaso from "./SoportesCaso";
 
 export const metadata: Metadata = {
   title: "Detalle del caso",
@@ -55,6 +56,13 @@ export default async function DetalleCasoPagina({ params }: Props) {
       </Link>
 
       <CabeceraAtencion atencion={atencion} />
+
+      <SoportesCaso
+        casoId={casoId}
+        documento={atencion.cedula}
+        nombres={atencion.nombres}
+        apellidos={atencion.apellidos}
+      />
 
       {errorSeguimientos ? (
         <p className="mt-8 text-cuerpo text-error-700">{errorSeguimientos}</p>
