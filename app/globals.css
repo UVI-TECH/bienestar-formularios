@@ -301,6 +301,53 @@
     outline-offset: 2px;
   }
 
+  /* Opción de un grupo de casillas (checkbox): mismo bloque visual que
+     `.opcion-radio`, pero admite varias marcadas a la vez (p. ej. los módulos
+     de una persona en el panel de administración). */
+  .opcion-casilla {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.625rem;
+    min-height: var(--alto-control);
+    padding: 0 1rem;
+    border-radius: var(--radius-campo);
+    border: 1px solid var(--color-borde-fuerte);
+    background-color: var(--color-superficie);
+    font-size: var(--text-campo);
+    color: var(--color-texto);
+    cursor: pointer;
+    transition-property: background-color, border-color;
+    transition-duration: var(--dur-rapida);
+    transition-timing-function: var(--ease-salida);
+  }
+
+  .opcion-casilla input[type="checkbox"] {
+    accent-color: var(--color-inst-700);
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0;
+  }
+
+  .opcion-casilla:hover {
+    border-color: var(--color-neutro-400);
+  }
+
+  .opcion-casilla:has(input:checked) {
+    border-color: var(--color-inst-600);
+    background-color: var(--color-inst-50);
+    font-weight: 500;
+  }
+
+  .opcion-casilla:has(input:disabled) {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .opcion-casilla:has(input:focus-visible) {
+    outline: 2px solid var(--color-inst-600);
+    outline-offset: 2px;
+  }
+
   /* Botón sólido institucional. */
   .boton-primario {
     display: inline-flex;

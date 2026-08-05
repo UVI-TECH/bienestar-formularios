@@ -1,7 +1,10 @@
+import type { ModuloId } from "./modulos";
 import type { Formato } from "./types";
 
 export interface FormatoConRuta extends Formato {
   ruta: string;
+  /** Módulo del control de acceso que exige la ruta (ver `lib/modulos.ts`). */
+  modulo: ModuloId;
 }
 
 /**
@@ -15,6 +18,7 @@ export interface FormatoConRuta extends Formato {
 export const FORMATOS = {
   enfermeria: {
     ruta: "/enfermeria",
+    modulo: "enfermeria",
     codigo: "BH-F-013",
     version: "V-1-2018",
     titulo: "Asistencia a Enfermería",
@@ -23,6 +27,7 @@ export const FORMATOS = {
   },
   consultaMedica: {
     ruta: "/consulta-medica",
+    modulo: "consulta-medica",
     codigo: "BH-F-020",
     version: "V-1-2018",
     titulo: "Consulta Médica",
@@ -31,6 +36,7 @@ export const FORMATOS = {
   },
   tamizaje: {
     ruta: "/tamizaje",
+    modulo: "tamizaje",
     codigo: "BH-F-016",
     version: "V-1-2018",
     titulo: "Tamizaje",
@@ -39,6 +45,7 @@ export const FORMATOS = {
   },
   poliza: {
     ruta: "/poliza",
+    modulo: "poliza",
     sello: "Formato en definición · Bienestar Universitario",
     titulo: "Accidente por Póliza Estudiantil",
     descripcion:

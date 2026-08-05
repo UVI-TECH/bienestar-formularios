@@ -85,3 +85,24 @@ export const variantesPanel: Variants = {
   visible: { opacity: 1, y: 0, transition: transicionMedia },
   sale: { opacity: 0, y: -6, transition: transicionRapida },
 };
+
+/**
+ * Contenedor de una lista que entra escalonada (filas de una tabla, entradas
+ * de una línea de tiempo). El desfase es breve a propósito: en una lista de
+ * una veintena de filas no debe notarse como "efecto", sólo dar la sensación
+ * de que el contenido se acomoda.
+ */
+export const variantesListaContenedor: Variants = {
+  oculto: {},
+  visible: { transition: { staggerChildren: 0.03 } },
+};
+
+/**
+ * Un elemento de esa lista. Sirve tanto para la entrada escalonada del
+ * contenedor como para un elemento que se agrega solo (un seguimiento nuevo):
+ * en ese caso se usa sin el contenedor, con la misma sensación de movimiento.
+ */
+export const variantesListaItem: Variants = {
+  oculto: { opacity: 0, y: 6 },
+  visible: { opacity: 1, y: 0, transition: transicionBase },
+};
