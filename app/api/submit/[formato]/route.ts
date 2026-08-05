@@ -4,6 +4,7 @@ import {
   sanearRegistro,
   variableDeFlujo,
 } from "@/lib/envio";
+import { ErrorNotificacion, notificarResponsablesSeguimiento } from "@/lib/notificaciones";
 
 /**
  * POST /api/submit/[formato]
@@ -20,6 +21,11 @@ import {
  * La URL del flujo NUNCA sale de aquí: vive en `PA_URL_<FORMATO>` y ni su
  * valor ni su existencia se reflejan en la respuesta.
  *
+ * Cuando `formato` es "poliza" y el caso queda con `estado: "En seguimiento"`,
+ * además se notifica por correo a los responsables de seguimiento (ver
+ * `lib/notificaciones.ts`). Es un paso posterior al registro, nunca lo
+ * condiciona: si la notificación falla, el caso sigue quedando registrado.
+ *
  *   200  registro entregado
  *   400  cuerpo ilegible o sin campos utilizables
  *   404  formato desconocido
@@ -28,6 +34,19 @@ import {
 
 const TIEMPO_LIMITE_MS = 15_000;
 const LATENCIA_SIMULADA_MS = 500;
+
+/**
+ * Enlace al detalle del caso para el correo de notificación.
+ *
+ * TODO(producción): fijar NEXT_PUBLIC_APP_URL con el dominio público de la
+ * app. Sin ella se usa el origin de la propia solicitud — normalmente
+ * coincide, pero puede no hacerlo detrás de un proxy que no reenvíe el host
+ * original.
+ */
+function urlDelCaso(request: Request, casoId: string): string {
+  const origen = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  return `${origen}/poliza/seguimiento/${casoId}`;
+}
 
 function responder(
   ok: boolean,
@@ -98,6 +117,26 @@ export async function POST(
         `[submit:${formato}] Power Automate respondió ${respuesta.status}.`,
       );
       return responder(false, 502);
+    }
+
+    // El caso ya quedó registrado (arriba): la notificación es un paso
+    // posterior que nunca puede hacer fallar el registro, así que su propio
+    // try/catch nunca deja escapar el error hacia la respuesta.
+    if (formato === "poliza" && registro.estado === "En seguimiento" && generados.caso_id) {
+      try {
+        await notificarResponsablesSeguimiento({
+          casoId: generados.caso_id,
+          estudiante: `${String(registro.nombres ?? "")} ${String(registro.apellidos ?? "")}`.trim(),
+          sede: String(registro.sede ?? ""),
+          diagnosticoPresuntivo: String(registro.diagnostico_presuntivo ?? ""),
+          urlCaso: urlDelCaso(request, generados.caso_id),
+        });
+      } catch (causa) {
+        console.error(
+          `[submit:poliza] el caso ${generados.caso_id} quedó registrado, pero falló la notificación:`,
+          causa instanceof ErrorNotificacion ? causa.message : causa,
+        );
+      }
     }
 
     return responder(true, 200, devueltos);
