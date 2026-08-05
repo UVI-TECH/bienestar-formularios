@@ -32,6 +32,7 @@ export interface DatosPersona {
   apellidos: string;
   tipoPersona: Opcional<TipoPersona>;
   programa: Programa;
+  facultad: string;
   semestre: Opcional<Semestre>;
   sexo: Opcional<Sexo>;
   /** Se guarda como texto para no arrastrar `NaN` desde el input. */
@@ -106,6 +107,7 @@ export interface RespuestaConsultaCedula {
   nombres?: string;
   apellidos?: string;
   programa?: string;
+  facultad?: string;
   semestre?: string;
 }
 

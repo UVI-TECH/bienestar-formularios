@@ -1,10 +1,15 @@
 import Link from "next/link";
+import BotonSalir from "./BotonSalir";
+import { obtenerSesion } from "@/lib/sesion";
 
 /**
  * Banda institucional presente en todas las pantallas. Estática por diseño:
- * la navegación entre páginas no se anima.
+ * la navegación entre páginas no se anima. Sólo cambia según haya o no
+ * sesión: quien no ha ingresado no ve el botón "Salir" ni su nombre.
  */
-export default function EncabezadoInstitucional() {
+export default async function EncabezadoInstitucional() {
+  const sesion = await obtenerSesion();
+
   return (
     <header className="border-b border-inst-950/30 bg-inst-800 text-inst-100">
       <div className="trama-pauta">
@@ -25,9 +30,18 @@ export default function EncabezadoInstitucional() {
             <p className="text-meta uppercase text-inst-300">Área de Salud</p>
           </div>
 
-          <p className="ml-auto hidden text-meta uppercase text-inst-300 sm:block">
-            Registro digital de formatos
-          </p>
+          {sesion ? (
+            <div className="ml-auto flex items-center gap-4">
+              <p className="hidden text-meta uppercase text-inst-300 sm:block">
+                {sesion.nombres} {sesion.apellidos}
+              </p>
+              <BotonSalir />
+            </div>
+          ) : (
+            <p className="ml-auto hidden text-meta uppercase text-inst-300 sm:block">
+              Registro digital de formatos
+            </p>
+          )}
         </div>
       </div>
     </header>
