@@ -20,7 +20,7 @@ import CampoFecha from "./CampoFecha";
 import CampoHora from "./CampoHora";
 import CampoSelect from "./CampoSelect";
 import CampoTexto from "./CampoTexto";
-import CampoTextarea from "./CampoTextarea";
+import CampoTextareaConIA from "./CampoTextareaConIA";
 import FormularioBase from "./FormularioBase";
 import RejillaCampos from "./RejillaCampos";
 import ResumenRegistro from "./ResumenRegistro";
@@ -424,7 +424,7 @@ export default function FormularioAtencion({
         titulo="Servicio prestado"
         descripcion="Registre lo consultado y lo realizado durante la atención."
       >
-        <CampoTextarea
+        <CampoTextareaConIA
           name="motivo"
           etiqueta="Motivo de consulta"
           valor={datos.motivo}
@@ -434,7 +434,7 @@ export default function FormularioAtencion({
           error={errores.motivo}
           requerido
         />
-        <CampoTextarea
+        <CampoTextareaConIA
           name="procedimiento"
           etiqueta="Procedimiento realizado"
           valor={datos.procedimiento}

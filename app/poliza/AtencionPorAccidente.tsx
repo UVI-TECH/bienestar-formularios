@@ -10,7 +10,7 @@ import CampoHora from "@/components/forms/CampoHora";
 import CampoRadio from "@/components/forms/CampoRadio";
 import CampoSelect from "@/components/forms/CampoSelect";
 import CampoTexto from "@/components/forms/CampoTexto";
-import CampoTextarea from "@/components/forms/CampoTextarea";
+import CampoTextareaConIA from "@/components/forms/CampoTextareaConIA";
 import FormularioBase from "@/components/forms/FormularioBase";
 import RejillaCampos from "@/components/forms/RejillaCampos";
 import ResumenRegistro from "@/components/forms/ResumenRegistro";
@@ -528,7 +528,7 @@ export default function AtencionPorAccidente({
           />
         </RejillaCampos>
 
-        <CampoTextarea
+        <CampoTextareaConIA
           name="atencionInicial"
           etiqueta="Atención inicial y primeros auxilios"
           valor={datos.atencionInicial}
@@ -618,7 +618,7 @@ export default function AtencionPorAccidente({
           />
         </CampoCondicional>
 
-        <CampoTextarea
+        <CampoTextareaConIA
           name="diagnostico"
           etiqueta="Diagnóstico presuntivo"
           valor={datos.diagnostico}
@@ -642,7 +642,7 @@ export default function AtencionPorAccidente({
           />
         </RejillaCampos>
 
-        <CampoTextarea
+        <CampoTextareaConIA
           name="observaciones"
           etiqueta="Observaciones"
           valor={datos.observaciones}

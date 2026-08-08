@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "motion/react";
 import CampoFecha from "@/components/forms/CampoFecha";
 import CampoSelect from "@/components/forms/CampoSelect";
 import CampoTexto from "@/components/forms/CampoTexto";
-import CampoTextarea from "@/components/forms/CampoTextarea";
+import CampoTextareaConIA from "@/components/forms/CampoTextareaConIA";
 import RejillaCampos from "@/components/forms/RejillaCampos";
 import { sinErrores } from "@/components/forms/utilidades";
 import Girador from "@/components/ui/Girador";
@@ -313,7 +313,7 @@ export default function LineaTiempoSeguimientos({
               />
             </RejillaCampos>
 
-            <CampoTextarea
+            <CampoTextareaConIA
               name="descripcion"
               etiqueta="Descripción"
               valor={datos.descripcion}

@@ -14,6 +14,7 @@ export { default as CampoRadio } from "./CampoRadio";
 export { default as CampoFecha } from "./CampoFecha";
 export { default as CampoHora } from "./CampoHora";
 export { default as CampoTextarea } from "./CampoTextarea";
+export { default as CampoTextareaConIA } from "./CampoTextareaConIA";
 export { default as CampoCedula } from "./CampoCedula";
 
 export { default as BloqueIdentificacion } from "./BloqueIdentificacion";
