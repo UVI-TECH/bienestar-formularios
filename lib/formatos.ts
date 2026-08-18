@@ -60,6 +60,15 @@ export const FORMATOS = {
     descripcion:
       "Registro de una brigada de salud y de las personas atendidas durante la jornada.",
   },
+  actividades: {
+    ruta: "/actividades",
+    modulo: "actividades",
+    codigo: "BH-F-033",
+    version: "V-1-2018",
+    titulo: "Listado de Asistencia a Actividades Institucionales",
+    descripcion:
+      "Registro de una actividad institucional y de quienes asistieron.",
+  },
 } as const satisfies Record<string, FormatoConRuta>;
 
 /** Orden en que se presentan los formatos en el índice. */
@@ -69,4 +78,5 @@ export const FORMATOS_EN_ORDEN: readonly FormatoConRuta[] = [
   FORMATOS.tamizaje,
   FORMATOS.poliza,
   FORMATOS.brigadas,
+  FORMATOS.actividades,
 ];

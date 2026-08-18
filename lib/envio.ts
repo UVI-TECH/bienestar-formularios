@@ -128,6 +128,11 @@ export function generarBrigadaId(referencia: number = Date.now()): string {
   return generarRadicado("BRG", referencia);
 }
 
+/** Radicado de una actividad institucional (ver `generarRadicado`). */
+export function generarActividadId(referencia: number = Date.now()): string {
+  return generarRadicado("ACT", referencia);
+}
+
 /** Campos que agrega el servidor según el formato. */
 export function camposDelServidor(
   formato: FormatoEnviable,
