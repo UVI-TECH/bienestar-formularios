@@ -51,6 +51,15 @@ export const FORMATOS = {
     descripcion:
       "Reporte del accidente y de los datos requeridos para activar la póliza estudiantil.",
   },
+  brigadas: {
+    ruta: "/brigadas",
+    modulo: "brigadas",
+    codigo: "BH-F-014",
+    version: "V-1-2018",
+    titulo: "Asistencia a Brigada de Salud",
+    descripcion:
+      "Registro de una brigada de salud y de las personas atendidas durante la jornada.",
+  },
 } as const satisfies Record<string, FormatoConRuta>;
 
 /** Orden en que se presentan los formatos en el índice. */
@@ -59,4 +68,5 @@ export const FORMATOS_EN_ORDEN: readonly FormatoConRuta[] = [
   FORMATOS.consultaMedica,
   FORMATOS.tamizaje,
   FORMATOS.poliza,
+  FORMATOS.brigadas,
 ];

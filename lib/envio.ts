@@ -90,16 +90,17 @@ const LONGITUD_SUFIJO = 6;
 const CICLO_MS = 36 ** LONGITUD_SUFIJO;
 
 /**
- * Radicado del accidente, con el formato `AP-{AAAA}-{6 caracteres base 36}`
- * — por ejemplo `AP-2026-1KP4ZC`.
+ * Radicado con el formato `{prefijo}-{AAAA}-{6 caracteres base 36}` — por
+ * ejemplo `AP-2026-1KP4ZC` o `BRG-2026-1KP4ZC`.
  *
- * Es la llave que une la atención con sus seguimientos y nombra la carpeta de
- * soportes, así que la prioridad es que no se repita. El sufijo son los
- * milisegundos del reloj en base 36: dos registros sólo coinciden si el
- * servidor los sella **en el mismo milisegundo**, o si están separados por un
- * múltiplo exacto de 25,2 días al milisegundo (≈ 1 en 2 176 millones). Frente a
- * un número aleatorio de la misma longitud es bastante mejor: los registros
- * reales están separados por segundos o minutos, no por azar.
+ * Es la llave que une el registro con lo que dependa de él (seguimientos,
+ * carpeta de soportes, lista de asistentes), así que la prioridad es que no se
+ * repita. El sufijo son los milisegundos del reloj en base 36: dos registros
+ * sólo coinciden si el servidor los sella **en el mismo milisegundo**, o si
+ * están separados por un múltiplo exacto de 25,2 días al milisegundo (≈ 1 en
+ * 2 176 millones). Frente a un número aleatorio de la misma longitud es
+ * bastante mejor: los registros reales están separados por segundos o
+ * minutos, no por azar.
  *
  * De paso, el sufijo crece con el tiempo, así que dentro de una misma ventana
  * de 25 días los radicados quedan en orden cronológico.
@@ -108,13 +109,23 @@ const CICLO_MS = 36 ** LONGITUD_SUFIJO;
  * registra. El año se toma en hora de Colombia, no en UTC, para que un registro
  * de la noche del 31 de diciembre no quede con el año siguiente.
  */
-export function generarCasoId(referencia: number = Date.now()): string {
+function generarRadicado(prefijo: string, referencia: number = Date.now()): string {
   const anio = fechaHoy().slice(0, 4);
   const sufijo = (referencia % CICLO_MS)
     .toString(36)
     .padStart(LONGITUD_SUFIJO, "0")
     .toUpperCase();
-  return `AP-${anio}-${sufijo}`;
+  return `${prefijo}-${anio}-${sufijo}`;
+}
+
+/** Radicado del accidente por póliza estudiantil (ver `generarRadicado`). */
+export function generarCasoId(referencia: number = Date.now()): string {
+  return generarRadicado("AP", referencia);
+}
+
+/** Radicado de una brigada de salud (ver `generarRadicado`). */
+export function generarBrigadaId(referencia: number = Date.now()): string {
+  return generarRadicado("BRG", referencia);
 }
 
 /** Campos que agrega el servidor según el formato. */

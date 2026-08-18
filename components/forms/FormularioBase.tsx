@@ -38,6 +38,13 @@ interface Props {
   mensajeExito?: string;
   etiquetaEnviar?: string;
   /**
+   * Deshabilita el botón de envío por una regla de negocio que no es "falta
+   * llenar un campo" (p. ej. una brigada sin asistentes agregados todavía).
+   * `validar` sigue siendo la red de seguridad si el formulario se envía de
+   * todos modos (Enter en un campo de texto).
+   */
+  enviarDeshabilitado?: boolean;
+  /**
    * `amplio` separa más las secciones. En un formulario largo, el aire entre
    * tramos es lo que evita que se lea como un muro de campos.
    */
@@ -61,6 +68,7 @@ export default function FormularioBase({
   resumenExito,
   mensajeExito = "El registro quedó guardado correctamente.",
   etiquetaEnviar,
+  enviarDeshabilitado = false,
   espaciado = "normal",
 }: Props) {
   const [estado, setEstado] = useState<EstadoEnvio>("inactivo");
@@ -219,7 +227,11 @@ export default function FormularioBase({
                   )}
                 </AnimatePresence>
 
-                <BotonEnviar estado={estado} etiqueta={etiquetaEnviar} />
+                <BotonEnviar
+                  estado={estado}
+                  etiqueta={etiquetaEnviar}
+                  deshabilitado={enviarDeshabilitado}
+                />
               </div>
             </motion.form>
           )}
