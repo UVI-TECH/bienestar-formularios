@@ -13,6 +13,7 @@ export const FORMATOS_ENVIABLES = [
   "consulta-medica",
   "tamizaje",
   "poliza",
+  "planificacion",
 ] as const;
 
 export type FormatoEnviable = (typeof FORMATOS_ENVIABLES)[number];
@@ -21,8 +22,17 @@ export function esFormatoEnviable(valor: string): valor is FormatoEnviable {
   return (FORMATOS_ENVIABLES as readonly string[]).includes(valor);
 }
 
-/** `consulta-medica` → `PA_URL_CONSULTA_MEDICA`. */
+/**
+ * `consulta-medica` → `PA_URL_CONSULTA_MEDICA`.
+ *
+ * `planificacion` es la excepción: su flujo ya se llama
+ * `PA_URL_GUARDAR_PLANIFICACION` (mismo prefijo `GUARDAR_` que
+ * `PA_URL_GUARDAR_BRIGADA`/`PA_URL_GUARDAR_ACTIVIDAD`, aunque esos dos tengan
+ * su propia ruta de envío en vez de pasar por este archivo), así que se
+ * respeta ese nombre en vez del derivado automáticamente.
+ */
 export function variableDeFlujo(formato: FormatoEnviable): string {
+  if (formato === "planificacion") return "PA_URL_GUARDAR_PLANIFICACION";
   return `PA_URL_${formato.toUpperCase().replace(/-/g, "_")}`;
 }
 

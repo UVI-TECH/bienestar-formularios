@@ -24,6 +24,7 @@ const RUTAS_PROTEGIDAS: Record<string, ModuloId> = {
   "/poliza": "poliza",
   "/brigadas": "brigadas",
   "/actividades": "actividades",
+  "/planificacion": "planificacion",
 };
 
 const PREFIJO_SEGUIMIENTO = "/poliza/seguimiento";
@@ -66,6 +67,7 @@ export const config = {
     "/poliza",
     "/brigadas",
     "/actividades",
+    "/planificacion",
     "/poliza/seguimiento",
     "/poliza/seguimiento/:path*",
     "/admin",

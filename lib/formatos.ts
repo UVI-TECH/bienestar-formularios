@@ -69,6 +69,15 @@ export const FORMATOS = {
     descripcion:
       "Registro de una actividad institucional y de quienes asistieron.",
   },
+  planificacion: {
+    ruta: "/planificacion",
+    modulo: "planificacion",
+    codigo: "BH-F-015",
+    version: "V-1-2018",
+    titulo: "Planificación Familiar",
+    descripcion:
+      "Registro de la persona atendida en planificación familiar y del medicamento suministrado.",
+  },
 } as const satisfies Record<string, FormatoConRuta>;
 
 /** Orden en que se presentan los formatos en el índice. */
@@ -79,4 +88,5 @@ export const FORMATOS_EN_ORDEN: readonly FormatoConRuta[] = [
   FORMATOS.poliza,
   FORMATOS.brigadas,
   FORMATOS.actividades,
+  FORMATOS.planificacion,
 ];

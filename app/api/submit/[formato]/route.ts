@@ -12,7 +12,8 @@ import { ErrorNotificacion, notificarResponsablesSeguimiento } from "@/lib/notif
  * Recibe un registro ya diligenciado y lo entrega al flujo de Power Automate
  * que lo agrega como fila en Excel.
  *
- * Formatos aceptados: enfermeria | consulta-medica | tamizaje | poliza.
+ * Formatos aceptados: enfermeria | consulta-medica | tamizaje | poliza |
+ * planificacion.
  *
  * El cuerpo llega con claves planas en snake_case (fecha, hora, sede,
  * tipo_persona, cedula, nombres, apellidos, programa, semestre, dependencia,
