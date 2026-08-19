@@ -1,4 +1,7 @@
 import { generarActividadId, marcaDeTiempo } from "@/lib/envio";
+import { consumirCupo, ipDeSolicitud } from "@/lib/limitadorTasa";
+import { tieneModulo } from "@/lib/modulos";
+import { obtenerSesion } from "@/lib/sesion";
 
 /**
  * POST /api/submit/actividad
@@ -14,11 +17,17 @@ import { generarActividadId, marcaDeTiempo } from "@/lib/envio";
  *
  *   200  actividad entregada
  *   400  cuerpo ilegible, sin datos del evento o sin asistentes
+ *   401  sin sesión
+ *   403  la sesión no tiene el módulo "actividades"
+ *   429  demasiados envíos seguidos
  *   502  el flujo falló, no respondió o no está configurado
  */
 
 const TIEMPO_LIMITE_MS = 15_000;
 const LATENCIA_SIMULADA_MS = 500;
+
+const MAXIMO_POR_VENTANA = 20;
+const VENTANA_MS = 60_000;
 
 const MAXIMO_ASISTENTES = 500;
 const MAXIMO_LARGO_CORTO = 200;
@@ -54,14 +63,29 @@ function sanearAsistente(valor: unknown): AsistenteActividad | undefined {
   };
 }
 
-function responder(ok: boolean, estado = 200, extra?: Record<string, unknown>): Response {
+function responder(
+  ok: boolean,
+  estado = 200,
+  extra?: Record<string, unknown>,
+  cabeceras?: HeadersInit,
+): Response {
   return Response.json(
     { ok, ...extra },
-    { status: estado, headers: { "Cache-Control": "no-store" } },
+    { status: estado, headers: { "Cache-Control": "no-store", ...cabeceras } },
   );
 }
 
 export async function POST(request: Request): Promise<Response> {
+  const sesion = await obtenerSesion();
+  if (!sesion) return responder(false, 401);
+  if (!tieneModulo(sesion.modulos, "actividades")) return responder(false, 403);
+
+  const ip = ipDeSolicitud(request.headers);
+  const cupo = consumirCupo(`submit:actividad:${ip}`, MAXIMO_POR_VENTANA, VENTANA_MS);
+  if (!cupo.permitido) {
+    return responder(false, 429, undefined, { "Retry-After": String(cupo.reintentarEn) });
+  }
+
   let cuerpo: unknown;
   try {
     cuerpo = await request.json();

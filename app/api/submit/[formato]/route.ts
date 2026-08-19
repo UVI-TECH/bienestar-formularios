@@ -4,7 +4,10 @@ import {
   sanearRegistro,
   variableDeFlujo,
 } from "@/lib/envio";
+import { consumirCupo, ipDeSolicitud } from "@/lib/limitadorTasa";
+import { tieneModulo } from "@/lib/modulos";
 import { ErrorNotificacion, notificarResponsablesSeguimiento } from "@/lib/notificaciones";
+import { obtenerSesion } from "@/lib/sesion";
 
 /**
  * POST /api/submit/[formato]
@@ -13,7 +16,9 @@ import { ErrorNotificacion, notificarResponsablesSeguimiento } from "@/lib/notif
  * que lo agrega como fila en Excel.
  *
  * Formatos aceptados: enfermeria | consulta-medica | tamizaje | poliza |
- * planificacion.
+ * planificacion — los mismos nombres son también sus ids de módulo (ver
+ * `lib/modulos.ts`), así que la sesión debe tener el módulo que coincide con
+ * el formato que se está enviando.
  *
  * El cuerpo llega con claves planas en snake_case (fecha, hora, sede,
  * tipo_persona, cedula, nombres, apellidos, programa, semestre, dependencia,
@@ -29,12 +34,18 @@ import { ErrorNotificacion, notificarResponsablesSeguimiento } from "@/lib/notif
  *
  *   200  registro entregado
  *   400  cuerpo ilegible o sin campos utilizables
+ *   401  sin sesión
+ *   403  la sesión no tiene el módulo del formato
  *   404  formato desconocido
+ *   429  demasiados envíos seguidos
  *   502  el flujo falló, no respondió o no está configurado
  */
 
 const TIEMPO_LIMITE_MS = 15_000;
 const LATENCIA_SIMULADA_MS = 500;
+
+const MAXIMO_POR_VENTANA = 20;
+const VENTANA_MS = 60_000;
 
 /**
  * Enlace al detalle del caso para el correo de notificación.
@@ -53,10 +64,11 @@ function responder(
   ok: boolean,
   estado = 200,
   extra?: Record<string, string>,
+  cabeceras?: HeadersInit,
 ): Response {
   return Response.json(
     { ok, ...extra },
-    { status: estado, headers: { "Cache-Control": "no-store" } },
+    { status: estado, headers: { "Cache-Control": "no-store", ...cabeceras } },
   );
 }
 
@@ -67,6 +79,18 @@ export async function POST(
   const { formato } = await contexto.params;
 
   if (!esFormatoEnviable(formato)) return responder(false, 404);
+
+  // La sesión debe tener el módulo del formato que se está enviando —
+  // los nombres de formato son también ids de módulo (ver `lib/modulos.ts`).
+  const sesion = await obtenerSesion();
+  if (!sesion) return responder(false, 401);
+  if (!tieneModulo(sesion.modulos, formato)) return responder(false, 403);
+
+  const ip = ipDeSolicitud(request.headers);
+  const cupo = consumirCupo(`submit:${formato}:${ip}`, MAXIMO_POR_VENTANA, VENTANA_MS);
+  if (!cupo.permitido) {
+    return responder(false, 429, undefined, { "Retry-After": String(cupo.reintentarEn) });
+  }
 
   let cuerpo: unknown;
   try {
