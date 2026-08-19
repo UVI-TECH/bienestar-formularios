@@ -15,14 +15,30 @@ npm run build
 ```
 app/
   layout.tsx                 Fuentes, metadatos, encabezado y pie institucionales
-  page.tsx                   Índice con las tarjetas hacia los cuatro formularios
+  page.tsx                   Índice con las tarjetas hacia los formularios habilitados
   globals.css                SISTEMA DE DISEÑO: todos los tokens visuales
   enfermeria/page.tsx        Asistencia a Enfermería (BH-F-013)
   consulta-medica/page.tsx   Consulta Médica (BH-F-020)
   tamizaje/page.tsx          Tamizaje (BH-F-016), con IMC en vivo
   poliza/page.tsx            Atención por Accidente — Póliza Estudiantil
+  brigadas/                  Asistencia a Brigada de Salud (BH-F-014) — evento + lista
+    page.tsx
+    FormularioBrigada.tsx
+    SubformularioAsistente.tsx
+    ListaAsistentes.tsx
+    tipos.ts
+  actividades/                Asistencia a Actividades Institucionales (BH-F-033)
+    page.tsx                 Mismo molde que brigadas, sin datos clínicos
+    FormularioActividad.tsx
+    SubformularioAsistente.tsx
+    ListaAsistentes.tsx
+    tipos.ts
+  planificacion/page.tsx      Planificación Familiar (BH-F-015)
+  planificacion/PlanificacionFamiliar.tsx
   api/lookup/route.ts        POST · consulta de estudiante por documento
-  api/submit/[formato]/      POST · entrega del registro a Power Automate
+  api/submit/[formato]/      POST · entrega el registro genérico a Power Automate
+  api/submit/brigada/        POST · entrega una brigada completa (evento + asistentes)
+  api/submit/actividad/      POST · entrega una actividad completa (evento + asistentes)
 components/
   forms/
     FormularioBase.tsx       Envoltura: encabezado, estado de envío, confirmación
@@ -55,24 +71,37 @@ lib/
   smartcampus.ts             Cliente del servicio externo (sólo servidor)
   limitadorTasa.ts           Límite de consultas por IP
   lookup.ts                  Cliente de /api/lookup (navegador)
-  envio.ts                   Saneamiento del registro (sólo servidor)
-  enviarRegistro.ts          Cliente de /api/submit (navegador)
+  envio.ts                   Saneamiento del registro y radicados (caso_id,
+                             brigada_id, actividad_id) — sólo servidor
+  enviarRegistro.ts          Cliente de /api/submit/[formato] (navegador)
+  enviarBrigada.ts           Cliente de /api/submit/brigada (navegador)
+  enviarActividad.ts         Cliente de /api/submit/actividad (navegador)
   fechas.ts                  Fecha/hora en zona America/Bogota
   validacion.ts              Reglas de validación reutilizables
   motion.ts                  Tokens de movimiento para JavaScript
   cn.ts
 ```
 
-Los cuatro formularios están implementados.
+Los siete formularios están implementados.
 
 Enfermería y Consulta Médica comparten toda su estructura, así que ambas páginas
 son un envoltorio de `FormularioAtencion`: sólo cambian el formato, la ruta de
-envío y quién atiende. Tamizaje y Póliza tienen sus propios campos.
+envío y quién atiende. Tamizaje, Póliza y Planificación Familiar tienen sus
+propios campos.
 
 Póliza es el formulario más largo, y por eso sus cuatro secciones llevan marca
 de paso (A–D) y separación amplia: se recorre de corrido, sin partirlo en
 páginas, para que se pueda volver atrás con la vista. La sección D va en panel
 destacado porque es la que decide si el caso queda abierto.
+
+Brigada de Salud y Actividades Institucionales siguen un molde distinto:
+**evento + lista**. A diferencia de los demás, un registro no es una persona
+sino un evento (fecha, lugar, quién lo atiende o lo dicta) al que asisten
+varias personas: los datos del evento se capturan una sola vez arriba, y los
+asistentes se van agregando a una lista con su propio sub-formulario —
+`SubformularioAsistente` — antes de enviar todo junto. Actividades es el mismo
+patrón sin datos clínicos: sin consulta a Smart Campus ni asistente de
+redacción, sólo campos de texto simples.
 
 ## Sistema de diseño
 
@@ -198,13 +227,17 @@ porque Smart Campus no los conoce.
 ## Envío de registros · `POST /api/submit/[formato]`
 
 Entrega el registro al flujo de Power Automate que lo agrega como fila en Excel.
-Formatos aceptados: `enfermeria`, `consulta-medica`, `tamizaje`, `poliza`.
+Formatos aceptados: `enfermeria`, `consulta-medica`, `tamizaje`, `poliza`,
+`planificacion`.
 
 El cuerpo son claves planas en snake_case; el servidor agrega `registrado_en`
 (ISO, reloj del servidor) y descarta cualquier clave con formato inesperado,
 objeto o arreglo, para que el navegador no pueda inyectar estructuras en el
 flujo. La URL del flujo vive en `PA_URL_<FORMATO>` y **nunca sale del servidor**:
 ni su valor ni el cuerpo de error del flujo se reflejan en la respuesta.
+`planificacion` es la única excepción al nombre de variable: por razones
+históricas usa `PA_URL_GUARDAR_PLANIFICACION` en vez de `PA_URL_PLANIFICACION`
+(ver `variableDeFlujo` en `lib/envio.ts`).
 
 | Código | Situación                                        |
 | ------ | ------------------------------------------------ |
@@ -257,17 +290,73 @@ tipo_remision · centro_medico · diagnostico_presuntivo · hora_egreso ·
 acompanante · observaciones · estado · registrado_en
 ```
 
-### Radicado del caso (`caso_id`)
+`planificacion` — mismo criterio que enfermeria/consulta-medica, sin `hora` ni
+`dependencia`:
 
-Sólo en póliza. Lo genera el servidor con el formato
-`AP-{AAAA}-{6 caracteres base 36}` — por ejemplo `AP-2026-1KP4ZC` —, tomando el
-año en hora de Colombia, y se devuelve al navegador para mostrarlo en la
+```
+fecha · sede · tipo_persona · cedula · nombres · apellidos · programa ·
+semestre · medicamento · observacion · profesional · registrado_en
+```
+
+### Índice de masa corporal
+
+`lib/antropometria.ts` calcula IMC = peso / talla², redondeado a un decimal, y
+lo clasifica con los rangos de la OMS (bajo peso, peso normal, sobrepeso,
+obesidad). Se recalcula en cada tecla y se envía ya calculado, junto con la
+clasificación, para que la fila pueda leerse sin repetir la cuenta.
+
+El valor es informativo: se presenta como lectura, en texto neutro y sin
+semáforos, porque acompaña la medición y no la diagnostica.
+
+## Eventos con lista de asistentes · `POST /api/submit/brigada` y `POST /api/submit/actividad`
+
+Brigada de Salud y Actividades Institucionales no son un registro por persona:
+son **un evento al que asisten varias personas**. Por eso no pasan por el
+endpoint genérico de arriba — su cuerpo trae un arreglo (`asistentes`), y
+`sanearRegistro` descarta arreglos a propósito para los formatos de fila plana
+— sino por su propia ruta, que sanea el arreglo a mano y limita cuántos
+asistentes admite por envío (300 en brigada, 500 en actividad).
+
+```
+POST /api/submit/brigada
+{ fecha, empresa, profesional, sede,
+  asistentes: [{ documento, nombres, apellidos, tipo_persona, semestre,
+                 programa, motivo_consulta }, …] }
+→ { ok, brigada_id, asistentes }
+
+POST /api/submit/actividad
+{ tema, facilitador, fecha, hora_inicio, hora_fin, lugar,
+  asistentes: [{ nombres_apellidos, documento, cargo, dependencia, correo }, …] }
+→ { ok, actividad_id, asistentes }
+```
+
+El servidor agrega `registrado_en` y el radicado del evento (ver abajo); igual
+que en el endpoint genérico, la URL del flujo — `PA_URL_GUARDAR_BRIGADA` o
+`PA_URL_GUARDAR_ACTIVIDAD` — nunca sale del servidor, y con `SUBMIT_MOCK=true`
+ninguna de las dos rutas sale a la red.
+
+En pantalla, cada asistente se arma en su propio sub-formulario
+(`SubformularioAsistente`) y se agrega a una lista (`ListaAsistentes`) que
+entra animada; el botón de envío queda deshabilitado
+(`FormularioBase.enviarDeshabilitado`) hasta que el evento es válido y hay al
+menos un asistente en la lista.
+
+### Radicados (`caso_id`, `brigada_id`, `actividad_id`)
+
+Póliza, Brigada de Salud y Actividades Institucionales necesitan un
+identificador propio para el registro. Los tres salen de la misma función,
+`generarRadicado` en `lib/envio.ts`, con el formato
+`{prefijo}-{AAAA}-{6 caracteres base 36}` — `AP-2026-1KP4ZC`,
+`BRG-2026-1KP4ZC`, `ACT-2026-1KP4ZC` —, tomando el año en hora de Colombia. Lo
+genera el servidor y se devuelve al navegador para mostrarlo en la
 confirmación.
 
-Es la llave que une la atención con sus seguimientos y nombra la carpeta de
-soportes, así que la prioridad es que no se repita. El sufijo son **los
+Es la llave que une el registro con lo que dependa de él (los seguimientos y
+la carpeta de soportes de un caso, la lista de asistentes de una brigada o
+actividad), así que la prioridad es que no se repita. El sufijo son **los
 milisegundos del reloj en base 36**, no un número al azar: como los registros
-reales están separados por segundos o minutos, dos radicados sólo coinciden si
+reales están separados por segundos o minutos, dos radicados del mismo prefijo
+sólo coinciden si
 
 - el servidor los sella en el **mismo milisegundo**, o
 - están separados por un múltiplo exacto de 25,2 días **al milisegundo**
@@ -281,16 +370,6 @@ de una misma ventana de 25 días los radicados quedan en orden cronológico.
 > dictar o teclear (`0`/`O`, `1`/`I`). Como el radicado se copia de la pantalla
 > de confirmación, en la práctica no estorba; si se va a dictar por teléfono,
 > conviene cambiar a un alfabeto sin ambigüedades (Crockford base 32).
-
-### Índice de masa corporal
-
-`lib/antropometria.ts` calcula IMC = peso / talla², redondeado a un decimal, y
-lo clasifica con los rangos de la OMS (bajo peso, peso normal, sobrepeso,
-obesidad). Se recalcula en cada tecla y se envía ya calculado, junto con la
-clasificación, para que la fila pueda leerse sin repetir la cuenta.
-
-El valor es informativo: se presenta como lectura, en texto neutro y sin
-semáforos, porque acompaña la medición y no la diagnostica.
 
 ## Pendientes conocidos
 
