@@ -5,6 +5,7 @@ import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import CheckAnimado from "@/components/ui/CheckAnimado";
 import CodigoFormato from "@/components/ui/CodigoFormato";
+import IconoFlechaAtras from "@/components/ui/IconoFlechaAtras";
 import { cn } from "@/lib/cn";
 import { variantesError, variantesPanel } from "@/lib/motion";
 import type { ErroresFormulario, EstadoEnvio, Formato } from "@/lib/types";
@@ -148,16 +149,16 @@ export default function FormularioBase({
     <div className="mx-auto max-w-3xl px-6 py-8">
       <Link
         href="/"
-        className="mb-5 inline-flex items-center gap-1.5 rounded-chip text-ayuda text-texto-medio transition-colors hover:text-inst-700"
+        className="mb-5 inline-flex h-9 items-center gap-1.5 rounded-campo border border-borde-fuerte bg-superficie px-3 text-etiqueta font-medium text-texto-medio transition-colors hover:border-neutro-400 hover:bg-superficie-tenue hover:text-texto"
       >
-        <span aria-hidden>←</span>
+        <IconoFlechaAtras className="h-3.5 w-3.5" />
         Volver al índice
       </Link>
 
       <section className="overflow-hidden rounded-tarjeta border border-borde bg-superficie shadow-tarjeta">
         <header className="border-b border-borde px-6 py-6 sm:px-8">
           <CodigoFormato formato={formato} />
-          <h1 className="mt-3 font-serif text-titulo font-semibold text-texto">
+          <h1 className="mt-3 font-display text-titulo font-semibold text-texto">
             {formato.titulo}
           </h1>
           {formato.descripcion && (
@@ -257,7 +258,7 @@ function PanelConfirmacion({
     >
       <CheckAnimado />
 
-      <h2 className="mt-5 font-serif text-titulo font-semibold text-texto">
+      <h2 className="mt-5 font-display text-titulo font-semibold text-texto">
         Registro guardado
       </h2>
       <p className="mt-1.5 max-w-md text-cuerpo text-texto-medio">{mensaje}</p>

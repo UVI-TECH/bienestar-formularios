@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import IconoFlechaAtras from "@/components/ui/IconoFlechaAtras";
 import { ErrorCasos, leerCasos, leerSeguimientos } from "@/lib/casos";
 import { obtenerSesion } from "@/lib/sesion";
 import CabeceraAtencion from "./CabeceraAtencion";
@@ -49,9 +50,9 @@ export default async function DetalleCasoPagina({ params }: Props) {
     <div className="mx-auto max-w-3xl px-6 py-8">
       <Link
         href="/poliza/seguimiento"
-        className="mb-5 inline-flex items-center gap-1.5 rounded-chip text-ayuda text-texto-medio transition-colors hover:text-inst-700"
+        className="mb-5 inline-flex h-9 items-center gap-1.5 rounded-campo border border-borde-fuerte bg-superficie px-3 text-etiqueta font-medium text-texto-medio transition-colors hover:border-neutro-400 hover:bg-superficie-tenue hover:text-texto"
       >
-        <span aria-hidden>←</span>
+        <IconoFlechaAtras className="h-3.5 w-3.5" />
         Volver a los casos
       </Link>
 

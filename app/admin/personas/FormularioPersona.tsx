@@ -146,7 +146,7 @@ export default function FormularioPersona({
   return (
     <section className="overflow-hidden rounded-tarjeta border border-borde bg-superficie shadow-tarjeta">
       <header className="border-b border-borde px-6 py-6 sm:px-8">
-        <h2 className="font-serif text-titulo font-semibold text-texto">
+        <h2 className="font-display text-titulo font-semibold text-texto">
           {modoEdicion ? "Editar persona" : "Agregar persona"}
         </h2>
         {modoEdicion && (

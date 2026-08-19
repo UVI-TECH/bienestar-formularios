@@ -38,7 +38,7 @@ export default function ListaCasos({ casos, error }: Props) {
         <p className="font-mono text-meta uppercase text-texto-tenue">
           Póliza estudiantil
         </p>
-        <h1 className="mt-2 font-serif text-portada font-semibold text-texto">
+        <h1 className="mt-2 font-display text-portada font-semibold text-texto">
           Seguimiento de casos
         </h1>
         <p className="mt-3 text-cuerpo text-texto-medio">

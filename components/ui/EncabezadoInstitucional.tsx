@@ -1,46 +1,59 @@
 import Link from "next/link";
 import BotonSalir from "./BotonSalir";
+import SelectorColorTema from "./SelectorColorTema";
 import { obtenerSesion } from "@/lib/sesion";
 
 /**
- * Banda institucional presente en todas las pantallas. Estática por diseño:
- * la navegación entre páginas no se anima. Sólo cambia según haya o no
- * sesión: quien no ha ingresado no ve el botón "Salir" ni su nombre.
+ * Banda superior presente en todas las pantallas. Estática por diseño: la
+ * navegación entre páginas no se anima. Sólo cambia según haya o no sesión:
+ * quien no ha ingresado no ve el botón "Salir" ni su nombre.
  */
 export default async function EncabezadoInstitucional() {
   const sesion = await obtenerSesion();
 
   return (
-    <header className="border-b border-inst-950/30 bg-inst-800 text-inst-100">
-      <div className="trama-pauta">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-4">
-          <Link
-            href="/"
-            className="rounded-chip font-serif text-lg font-semibold tracking-tight text-white transition-colors hover:text-inst-200"
+    <header className="border-b border-borde bg-superficie">
+      <div className="mx-auto flex max-w-5xl items-center gap-3.5 px-6 py-3.5">
+        <Link
+          href="/"
+          className="flex items-center gap-3.5 rounded-chip transition-opacity hover:opacity-80"
+        >
+          <span
+            aria-hidden
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-campo font-display text-sm font-extrabold text-white"
+            style={{
+              background:
+                "linear-gradient(155deg, var(--color-inst-500), var(--color-inst-700))",
+            }}
           >
-            UNIAJC
-          </Link>
-
-          <span aria-hidden className="h-8 w-px bg-white/20" />
-
-          <div className="leading-tight">
-            <p className="text-etiqueta font-medium text-white">
+            UJ
+          </span>
+          <span className="leading-tight">
+            <span className="block font-display text-etiqueta font-bold text-texto">
               Bienestar Universitario
-            </p>
-            <p className="text-meta uppercase text-inst-300">Área de Salud</p>
-          </div>
+            </span>
+            <span className="block text-meta uppercase text-texto-tenue">
+              UNIAJC · Área de Salud
+            </span>
+          </span>
+        </Link>
 
+        <div className="ml-auto flex items-center gap-1">
           {sesion ? (
-            <div className="ml-auto flex items-center gap-4">
-              <p className="hidden text-meta uppercase text-inst-300 sm:block">
+            <>
+              <p className="hidden pr-2 text-meta uppercase text-texto-tenue sm:block">
                 {sesion.nombres} {sesion.apellidos}
               </p>
+              <SelectorColorTema />
               <BotonSalir />
-            </div>
+            </>
           ) : (
-            <p className="ml-auto hidden text-meta uppercase text-inst-300 sm:block">
-              Registro digital de formatos
-            </p>
+            <>
+              <p className="hidden rounded-chip bg-superficie-tenue px-3 py-1.5 text-meta uppercase text-texto-tenue sm:block">
+                Registro digital de formatos
+              </p>
+              <SelectorColorTema />
+            </>
           )}
         </div>
       </div>

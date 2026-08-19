@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import CodigoFormato from "@/components/ui/CodigoFormato";
+import IconoFlecha from "@/components/ui/IconoFlecha";
 import { cn } from "@/lib/cn";
 import { FORMATOS_EN_ORDEN } from "@/lib/formatos";
 import { tieneModulo } from "@/lib/modulos";
@@ -39,8 +40,10 @@ export default async function Indice() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <header className="max-w-2xl">
-        <p className="font-mono text-meta uppercase text-texto-tenue">Índice</p>
-        <h1 className="mt-2 font-serif text-portada font-semibold text-texto">
+        <p className="inline-flex items-center rounded-chip bg-inst-50 px-3 py-1 font-mono text-meta uppercase text-inst-700">
+          Índice
+        </p>
+        <h1 className="mt-3 font-display text-portada font-extrabold text-texto">
           Formularios del área de salud
         </h1>
         <p className="mt-3 text-cuerpo text-texto-medio">
@@ -69,13 +72,13 @@ export default async function Indice() {
                   </span>
                   <span
                     aria-hidden
-                    className="text-inst-400 transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-inst-700"
+                    className="flex h-7 w-7 shrink-0 items-center justify-center rounded-chip bg-superficie-tenue text-inst-500 transition-[transform,background-color,color] group-hover:translate-x-0.5 group-hover:bg-inst-100 group-hover:text-inst-700"
                   >
-                    →
+                    <IconoFlecha className="h-3.5 w-3.5" />
                   </span>
                 </div>
 
-                <h2 className="mt-4 font-serif text-subtitulo font-semibold text-texto">
+                <h2 className="mt-4 font-display text-subtitulo font-semibold text-texto">
                   {formato.titulo}
                 </h2>
                 <p className="mt-2 flex-1 text-ayuda text-texto-medio">
@@ -107,7 +110,7 @@ export default async function Indice() {
                   <p className="font-mono text-meta uppercase text-texto-tenue">
                     {enlace.etiqueta}
                   </p>
-                  <p className="mt-1 font-serif text-subtitulo font-semibold text-texto">
+                  <p className="mt-1 font-display text-subtitulo font-semibold text-texto">
                     {enlace.titulo}
                   </p>
                   <p className="mt-1 text-ayuda text-texto-medio">
@@ -116,9 +119,9 @@ export default async function Indice() {
                 </div>
                 <span
                   aria-hidden
-                  className="text-inst-400 transition-[transform,color] group-hover:translate-x-0.5 group-hover:text-inst-700"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-chip bg-superficie text-inst-500 transition-[transform,background-color,color] group-hover:translate-x-0.5 group-hover:bg-inst-100 group-hover:text-inst-700"
                 >
-                  →
+                  <IconoFlecha className="h-3.5 w-3.5" />
                 </span>
               </Link>
             ))}

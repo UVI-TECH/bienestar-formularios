@@ -131,7 +131,7 @@ export default function FormularioIngreso() {
         <p className="font-mono text-meta uppercase text-texto-tenue">
           Ingreso
         </p>
-        <h1 className="mt-2 font-serif text-titulo font-semibold text-texto">
+        <h1 className="mt-2 font-display text-titulo font-semibold text-texto">
           Bienestar Universitario
         </h1>
         <p className="mt-1.5 text-cuerpo text-texto-medio">

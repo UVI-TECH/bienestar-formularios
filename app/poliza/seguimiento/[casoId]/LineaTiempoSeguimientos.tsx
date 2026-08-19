@@ -175,7 +175,7 @@ export default function LineaTiempoSeguimientos({
     <div className="mt-8 space-y-8">
       <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="font-serif text-subtitulo font-semibold text-texto">
+          <h2 className="font-display text-subtitulo font-semibold text-texto">
             Seguimientos
           </h2>
 
@@ -288,7 +288,7 @@ export default function LineaTiempoSeguimientos({
 
       {abierto && (
         <section className="rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8">
-          <h2 className="font-serif text-subtitulo font-semibold text-texto">
+          <h2 className="font-display text-subtitulo font-semibold text-texto">
             Agregar seguimiento
           </h2>
 

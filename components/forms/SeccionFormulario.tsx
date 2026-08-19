@@ -46,7 +46,7 @@ export default function SeccionFormulario({
               {paso}
             </span>
           )}
-          <span className="font-serif text-subtitulo font-semibold text-texto">
+          <span className="font-display text-subtitulo font-semibold text-texto">
             {/* El paso también se anuncia, para que no dependa del recuadro. */}
             {paso && <span className="sr-only">Paso {paso}. </span>}
             {titulo}

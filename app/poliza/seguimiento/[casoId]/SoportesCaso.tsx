@@ -235,7 +235,7 @@ export default function SoportesCaso({ casoId, documento, nombres, apellidos }: 
   return (
     <section className="mt-8 rounded-tarjeta border border-borde bg-superficie p-6 shadow-tarjeta sm:p-8">
       <div>
-        <h2 className="font-serif text-subtitulo font-semibold text-texto">Soportes</h2>
+        <h2 className="font-display text-subtitulo font-semibold text-texto">Soportes</h2>
         <p className="mt-1 text-ayuda text-texto-medio">
           Incapacidades, fórmulas, historia clínica, radiografías y demás documentos de
           la reclamación ante la aseguradora.

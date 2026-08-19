@@ -82,7 +82,7 @@ export default function PanelPersonas({ personasIniciales, documentoPropio, erro
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <p className="font-mono text-meta uppercase text-texto-tenue">Administración</p>
-          <h1 className="mt-2 font-serif text-portada font-semibold text-texto">
+          <h1 className="mt-2 font-display text-portada font-semibold text-texto">
             Personas y accesos
           </h1>
           <p className="mt-3 text-cuerpo text-texto-medio">

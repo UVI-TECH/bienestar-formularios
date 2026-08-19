@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import IconoSalir from "./IconoSalir";
 
 export default function BotonSalir() {
   const router = useRouter();
@@ -23,8 +24,9 @@ export default function BotonSalir() {
       type="button"
       onClick={salir}
       disabled={saliendo}
-      className="rounded-chip text-meta uppercase text-inst-200 underline-offset-2 transition-colors hover:text-white hover:underline disabled:opacity-60"
+      className="flex h-9 items-center gap-1.5 rounded-campo border border-borde-fuerte bg-superficie px-3 text-etiqueta font-medium text-texto-medio transition-colors hover:border-neutro-400 hover:bg-superficie-tenue hover:text-texto disabled:opacity-60"
     >
+      <IconoSalir className="h-3.5 w-3.5" />
       Salir
     </button>
   );
